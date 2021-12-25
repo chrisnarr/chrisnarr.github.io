@@ -84,7 +84,7 @@
                     layout: '1'
                 },
                 linkedin: { //http://developer.linkedin.com/plugins/share-button
-                    url: '', //if you need to personalize url button
+                    url: 'https://www.linkedin.com/in/christopher-narr-374047137/', //if you need to personalize url button
                     urlCount: false, //if you want to use personnalize button url on global counter
                     counter: ''
                 },
