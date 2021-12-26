@@ -1272,21 +1272,21 @@
   fieldset[disabled] .btn-primary.focus,
   fieldset[disabled] .btn-primary:active,
   fieldset[disabled] .btn-primary.active {
-    background-color: #378C3F;
+    background-color: #ebbe43;
     border-color: #378C3F; }
   .btn-primary.btn-simple {
-    color: #378C3F;
+    color: #ebbe43;
     border-color: #378C3F; }
     .btn-primary.btn-simple:hover, .btn-primary.btn-simple:focus, .btn-primary.btn-simple:active {
       background-color: transparent;
-      color: #40a249;
+      color: #ebbe43;
       border-color: #40a249;
       box-shadow: none; }
   .btn-primary.btn-link {
     color: #378C3F; }
     .btn-primary.btn-link:hover, .btn-primary.btn-link:focus, .btn-primary.btn-link:active {
       background-color: transparent;
-      color: #40a249;
+      color: #ebbe43;
       text-decoration: none;
       box-shadow: none; }
 
