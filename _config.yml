@@ -8,7 +8,7 @@
 
 # Basic Site Settings
 locale: "en-US"
-title: "Chris Narr"
+title: "C. Narr"
 title_separator: "-"
 name: &name "Christopher Narr"
 description: &description "personal description"
@@ -22,9 +22,9 @@ repository: "academicpages/academicpages.github.io"
 author:
   # Biographic information
   avatar: "profile.png"
-  name: "Chris Narr"
+  name: "Christopher Narr"
   pronouns: # example: "she/her"
-  bio: "Short biography for the left-hand sidebar"
+  bio: "I'm a fan of control theory and machine learning, ranging from the application in cars to humanoid robots."
   location: "Munich, Germany"
   employer: "Technical University of Munich"
   uri: # URL
