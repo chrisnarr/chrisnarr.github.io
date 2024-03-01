@@ -4,11 +4,11 @@ excerpt: "Short description of portfolio item number 1<br/><img src='/images/500
 collection: knowledge
 ---
 
-> [!idea] Idea
+> [!idea] **Idea**
 >
 > - System besitzt zu Beginn **positive Energie**
 > - Zeige, dass Energie des Systems **streng monoton fallend** ist
->   → für $t\rightarrow\infty$ muss Energie des Systems gegen Null gehen
+>   → für \\(t\rightarrow\infty\\) muss Energie des Systems gegen Null gehen
 >   → System **ohne** Energie muss in **Ruhe** sein
 
 > [!pro] **PRO**
