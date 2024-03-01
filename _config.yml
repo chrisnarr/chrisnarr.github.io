@@ -196,7 +196,7 @@ collections:
   publications:
     output: true
     permalink: /:collection/:path/
-  portfolio:
+  knowledge_base:
     output: true
     permalink: /:collection/:path/
   talks:
@@ -241,10 +241,10 @@ defaults:
       author_profile: true
       share: true
       comments: true
-  # _portfolio
+  # _knowledge
   - scope:
       path: ""
-      type: portfolio
+      type: knowledge
     values:
       layout: single
       author_profile: true
