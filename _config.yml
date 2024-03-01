@@ -196,7 +196,7 @@ collections:
   publications:
     output: true
     permalink: /:collection/:path/
-  knowledge_base:
+  knowledge:
     output: true
     permalink: /:collection/:path/
   talks:
