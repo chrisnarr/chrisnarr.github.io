@@ -8,7 +8,7 @@ collection: knowledge
 >
 > - System besitzt zu Beginn **positive Energie**
 > - Zeige, dass Energie des Systems **streng monoton fallend** ist
->   → für \\(t\rightarrow\infty\\) muss Energie des Systems gegen Null gehen
+>   → für $$t\rightarrow\infty$$ muss Energie des Systems gegen Null gehen
 >   → System **ohne** Energie muss in **Ruhe** sein
 
 > [!pro] **PRO**
@@ -25,25 +25,25 @@ collection: knowledge
 # Für zeitinvariante Systeme
 
 **Zeitinvariantes System (3.4)**
-$$ \underline{\dot{x}}=\underline{f}(\underline{x}), \;\;\; \underline{x}(t_0)=\underline{x}\_0, \;\;\;\underline{x}\in\mathbb{R}^n $$
-mit Ruhelage $\underline{x}^*=\underline{0}$
+$$ \underline{\dot{x}}=\underline{f}(\underline{x}), \;\;\; \underline{x}(t_0)=\underline{x}_0, \;\;\;\underline{x}\in\mathbb{R}^n $$
+mit Ruhelage $$\underline{x}^*=\underline{0}$$
 
 > [!idea] Idea
 >
-> - Betrachtung der Änderung von $V(\underline{x})$ entlang der Systemtrajektorien
-> - Bilden der zeitlichen Ableitung von $V(\underline{x})$
+> - Betrachtung der Änderung von $$V(\underline{x})$$ entlang der Systemtrajektorien
+> - Bilden der zeitlichen Ableitung von $$V(\underline{x})$$
 >   $$
 >   \dot{V}(\underline{x})= \sum_{i=1}^{n}\frac{\partial V}{\partial x_i}\dot{x}_i= \sum_{i=1}^{n}\frac{\partial V}{\partial x_i}f_i(\underline{x})= \frac{\partial V}{\partial \underline{x}}\underline{f}(\underline{x})
 >   $$
-> - **Lie-Ableitung:** Beschreibt, wie sich Funktion $V(\underline{x})$ entlang der Trajektorien des Systems (3.4) ändert
+> - **Lie-Ableitung:** Beschreibt, wie sich Funktion $$V(\underline{x})$$ entlang der Trajektorien des Systems (3.4) ändert
 
 > [!theorem] Theorem: Direkte Methode von Lyapunov für lokale Stabilität
 >
-> 1.  Sei $\underline{x}^*=\underline{0}$ eine Ruhelage von (3.4)
-> 2.  Sei $V(\underline{x})$ eine **stetig differenzierbare**, **lokal positiv definite** Funktion
-> 3.  Sei **lokal** $\dot{V}(\underline{x})\leq 0$
+> 1.  Sei $$\underline{x}^*=\underline{0}$$ eine Ruhelage von (3.4)
+> 2.  Sei $$V(\underline{x})$$ eine **stetig differenzierbare**, **lokal positiv definite** Funktion
+> 3.  Sei **lokal** $$\dot{V}(\underline{x})\leq 0$$
 >
-> Dann ist $\underline{x}^*$ **lokal stabil** i.S.v.L, gilt $\dot{V}(\underline{x}) < 0$, so ist $\underline{x}^*$ **lokal asymptotisch stabil** i.S.v.L.
+> Dann ist $$\underline{x}^*$$ **lokal stabil** i.S.v.L, gilt $$\dot{V}(\underline{x}) < 0$$, so ist $$\underline{x}^*$$ **lokal asymptotisch stabil** i.S.v.L.
 
 > [!theorem] Theorem: Direkte Methode von Lyapunov für globale Stabilität
 >
