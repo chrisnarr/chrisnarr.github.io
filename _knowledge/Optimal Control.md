@@ -2,7 +2,7 @@
 title: Optimal Control
 excerpt: "TBD"
 collection: knowledge
-draft: false
+draft: true
 tags:
   -
 ---

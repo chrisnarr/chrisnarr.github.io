@@ -2,7 +2,7 @@
 title: Passitivity
 excerpt: "TBD"
 collection: knowledge
-draft: false
+draft: true
 tags:
   -
 ---

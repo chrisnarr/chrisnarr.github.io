@@ -2,7 +2,7 @@
 title: Nyquist Diagram
 excerpt: "TBD"
 collection: knowledge
-draft: false
+draft: true
 tags:
   - diagram
 ---

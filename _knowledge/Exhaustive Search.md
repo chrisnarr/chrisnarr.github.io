@@ -2,7 +2,7 @@
 title: Exhaustive Search
 excerpt: "TBD"
 collection: knowledge
-draft: false
+draft: true
 tags:
   - gradient-free
   - optimization

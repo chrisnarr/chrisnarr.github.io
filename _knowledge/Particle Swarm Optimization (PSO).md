@@ -2,7 +2,7 @@
 title: Particle Swarm Optimization (PSO)
 excerpt: "TBD"
 collection: knowledge
-draft: false
+draft: true
 tags:
   - gradient-free
   - optimization

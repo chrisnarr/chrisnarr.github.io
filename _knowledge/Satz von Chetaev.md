@@ -2,7 +2,7 @@
 title: Satz von Chetaev
 excerpt: "TBD"
 collection: knowledge
-draft: false
+draft: true
 tags:
 ---
 
