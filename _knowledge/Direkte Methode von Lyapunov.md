@@ -4,12 +4,15 @@ excerpt: "The Direct Method of Lyapunov is a way to prove stability for a dynami
 collection: knowledge
 ---
 
+**Test** Was geht ab
+
 > [!idea] **Idea**
 >
 > - System besitzt zu Beginn **positive Energie**
 > - Zeige, dass Energie des Systems **streng monoton fallend** ist
 >   → für $$t\rightarrow\infty$$ muss Energie des Systems gegen Null gehen
 >   → System **ohne** Energie muss in **Ruhe** sein
+{: .notice}
 
 > [!pro] **PRO**
 >
