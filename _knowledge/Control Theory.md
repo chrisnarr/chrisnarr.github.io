@@ -2,7 +2,7 @@
 title: Control Theory
 excerpt: "TBD"
 collection: knowledge
-draft: false
+draft: true
 tags:
   -
 ---

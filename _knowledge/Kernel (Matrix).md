@@ -2,7 +2,7 @@
 title: Kernel (Matrix)
 excerpt: "TBD"
 collection: knowledge
-draft: false
+draft: true
 tags:
   -
 ---
