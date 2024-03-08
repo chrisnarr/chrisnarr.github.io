@@ -12,7 +12,7 @@ collection: knowledge
 > - Zeige, dass Energie des Systems **streng monoton fallend** ist
 >   → für $$t\rightarrow\infty$$ muss Energie des Systems gegen Null gehen
 >   → System **ohne** Energie muss in **Ruhe** sein
-{: .notice}
+{: .notice--info}
 
 > [!pro] **PRO**
 >
