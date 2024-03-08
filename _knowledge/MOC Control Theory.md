@@ -1,5 +1,7 @@
 ---
 title: Control Theory
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   -

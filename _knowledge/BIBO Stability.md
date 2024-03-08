@@ -1,5 +1,7 @@
 ---
 title: Bounded-Input-Bounded-Output (BIBO) Stability
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

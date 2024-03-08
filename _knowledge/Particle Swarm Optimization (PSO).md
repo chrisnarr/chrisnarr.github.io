@@ -1,5 +1,7 @@
 ---
 title: Particle Swarm Optimization (PSO)
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   - gradient-free

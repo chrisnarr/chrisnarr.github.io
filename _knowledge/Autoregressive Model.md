@@ -1,5 +1,7 @@
 ---
-title: Controllability
+title: Autoregressive Model
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
 ---

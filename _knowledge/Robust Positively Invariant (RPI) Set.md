@@ -1,5 +1,7 @@
 ---
 title: Robust Positively Invariant (RPI) Set
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

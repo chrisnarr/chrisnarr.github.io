@@ -1,5 +1,7 @@
 ---
 title: LaSalle's Invariance Principle
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
 ---

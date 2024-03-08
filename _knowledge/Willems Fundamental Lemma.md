@@ -1,5 +1,7 @@
 ---
 title: Willem's Fundamental Lemma
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

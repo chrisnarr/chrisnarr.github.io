@@ -1,5 +1,7 @@
 ---
 title: Bellman's Equation
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

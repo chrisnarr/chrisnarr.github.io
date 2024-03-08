@@ -1,5 +1,7 @@
 ---
 title: Flat System Analysis
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

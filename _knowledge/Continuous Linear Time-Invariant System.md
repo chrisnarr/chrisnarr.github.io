@@ -1,5 +1,7 @@
 ---
-title: Controllability
+title: Continuous Linear Time-Invariant System
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
 ---

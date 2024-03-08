@@ -1,5 +1,7 @@
 ---
 title: Pole-Zero Plot
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   - diagram

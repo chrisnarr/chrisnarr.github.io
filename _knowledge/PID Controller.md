@@ -1,5 +1,7 @@
 ---
 title: Controllability
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   -

@@ -1,5 +1,7 @@
 ---
 title: State Linearization
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

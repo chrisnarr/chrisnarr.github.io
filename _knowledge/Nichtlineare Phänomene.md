@@ -1,6 +1,8 @@
 ---
 title: Controllability
 draft: true
+excerpt: "TBD"
+collection: knowledge
 tags:
 ---
 

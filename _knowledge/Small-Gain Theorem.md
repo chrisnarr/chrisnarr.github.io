@@ -1,5 +1,7 @@
 ---
 title: Small-Gain Theorem
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

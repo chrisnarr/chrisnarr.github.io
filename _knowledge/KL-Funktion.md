@@ -1,5 +1,7 @@
 ---
 title: KL Function
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   -

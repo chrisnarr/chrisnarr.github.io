@@ -1,5 +1,7 @@
 ---
 title: Indirect Method of Lyapunov
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   - stability

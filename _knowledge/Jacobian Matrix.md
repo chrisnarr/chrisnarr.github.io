@@ -1,5 +1,7 @@
 ---
 title: Jacobian
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   -

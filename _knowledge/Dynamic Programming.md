@@ -1,5 +1,7 @@
 ---
 title: Dynamic Programming (DP)
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

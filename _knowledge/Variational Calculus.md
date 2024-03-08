@@ -1,5 +1,7 @@
 ---
 title: Variational Calculus
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

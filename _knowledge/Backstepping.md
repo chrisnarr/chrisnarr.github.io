@@ -1,5 +1,7 @@
 ---
 title: Backstepping
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

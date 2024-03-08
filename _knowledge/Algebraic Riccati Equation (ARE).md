@@ -1,5 +1,7 @@
 ---
-title: Controllability
+title: Algebraic Riccati Equation (ARE)
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

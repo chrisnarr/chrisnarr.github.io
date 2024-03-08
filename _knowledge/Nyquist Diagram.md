@@ -1,5 +1,7 @@
 ---
 title: Nyquist Diagram
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   - diagram

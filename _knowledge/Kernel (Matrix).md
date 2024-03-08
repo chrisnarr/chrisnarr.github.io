@@ -1,5 +1,7 @@
 ---
 title: Kernel (Matrix)
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   -

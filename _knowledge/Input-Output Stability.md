@@ -1,5 +1,7 @@
 ---
 title: Input-Output Stability (IOS)
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   - stability

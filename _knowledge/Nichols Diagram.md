@@ -1,5 +1,7 @@
 ---
 title: Nichols Diagram
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   - diagram

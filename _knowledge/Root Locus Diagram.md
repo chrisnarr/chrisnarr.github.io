@@ -1,5 +1,7 @@
 ---
 title: Root Locus Diagram
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   - diagram

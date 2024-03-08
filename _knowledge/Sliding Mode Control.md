@@ -1,5 +1,7 @@
 ---
 title: Sliding Mode Control (SMC)
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

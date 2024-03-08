@@ -1,5 +1,7 @@
 ---
 title: Probabilistic Reachable Set (PRS)
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

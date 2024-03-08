@@ -1,5 +1,7 @@
 ---
-title: Controllability
+title: Decreasing Function
+excerpt: "Decreasing functions are..."
+collection: knowledge
 draft: true
 tags:
   -

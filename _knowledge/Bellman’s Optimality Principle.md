@@ -1,5 +1,7 @@
 ---
-title: Controllability
+title: Bellman's Optimality Principle
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

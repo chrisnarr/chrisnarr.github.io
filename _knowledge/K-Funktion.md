@@ -1,5 +1,7 @@
 ---
 title: K-Function
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   -

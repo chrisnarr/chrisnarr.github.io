@@ -1,5 +1,7 @@
 ---
-title: Controllability
+title: Coefficient of Variation
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

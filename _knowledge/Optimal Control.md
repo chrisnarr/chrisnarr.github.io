@@ -1,5 +1,7 @@
 ---
 title: Optimal Control
+excerpt: "TBD"
+collection: knowledge
 draft: false
 tags:
   -

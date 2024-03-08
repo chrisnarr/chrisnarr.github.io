@@ -1,5 +1,7 @@
 ---
-title: Data-driven Control (DDC)
+title: Curse of Dimensionality
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   -

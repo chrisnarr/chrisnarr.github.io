@@ -1,5 +1,7 @@
 ---
 title: Bayesian Optimization (BO)
+excerpt: "TBD"
+collection: knowledge
 draft: true
 tags:
   - iterative optimization
