@@ -4,24 +4,21 @@ excerpt: "The Direct Method of Lyapunov is a way to prove stability for a dynami
 collection: knowledge
 ---
 
-**Test** Was geht ab
+**Idea**
+ - System besitzt zu Beginn **positive Energie**
+ - Zeige, dass Energie des Systems **streng monoton fallend** ist
+   → für $$t\rightarrow\infty$$ muss Energie des Systems gegen Null gehen
+   → System **ohne** Energie muss in **Ruhe** sein
+{: .notice--idea}
 
-> [!idea] **Idea**
->
-> - System besitzt zu Beginn **positive Energie**
-> - Zeige, dass Energie des Systems **streng monoton fallend** ist
->   → für $$t\rightarrow\infty$$ muss Energie des Systems gegen Null gehen
->   → System **ohne** Energie muss in **Ruhe** sein
-{: .notice--info}
+**PRO**
+- Differentialgleichung muss für Stabilitätsaussage der Ruhelagen **nicht** explizit **gelöst** werden
+{: .notice--pro}
 
-> [!pro] **PRO**
->
-> - Differentialgleichung muss für Stabilitätsaussage der Ruhelagen **nicht** explizit **gelöst** werden
-
-> [!con] **CON**
->
-> - Nicht für jedes System lässt sich Energie-Funktion berechnen → **Pseudo-Energie-Funktionen**
-> - Schwierig, geeignete Lyapunov-Funktion zu finden
+**CON**
+- Nicht für jedes System lässt sich Energie-Funktion berechnen → **Pseudo-Energie-Funktionen**
+- Schwierig, geeignete Lyapunov-Funktion zu finden
+{: .notice--con}
 
 ---
 
