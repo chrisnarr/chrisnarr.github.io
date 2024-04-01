@@ -2,6 +2,8 @@
 title: "Direct Method of Lyapunov"
 excerpt: "The Direct Method of Lyapunov is a way to prove stability for a dynamical system."
 collection: knowledge
+draft: true
+tags:
 ---
 
 > **Idea**
