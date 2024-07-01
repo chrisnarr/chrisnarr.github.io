@@ -7,5 +7,4 @@ redirect_from:
   - /about.html
 ---
 
-I’m currently writing my master’s thesis at the [Chair of Automatic Control Engineering](https://www.ce.cit.tum.de/en/lsr/home/) at [TUM](https://www.tum.de/en/) titled “Stochastic Data-driven Predictive Control with Online Adaptation”.
-My study and interests focus on control theory in combination with machine learning.
+I’m a PhD student at the [Chair of Automatic Control Engineering](https://www.ce.cit.tum.de/en/lsr/home/) at [TUM](https://www.tum.de/en/) in the field of learning-based control and safe reinforcement learning.
