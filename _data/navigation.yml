@@ -1,10 +1,4 @@
 # main links links
 main:
-  - title: "Teaching"
-    url: /teaching/
-
-  - title: "Knowledge Base"
-    url: /knowledge/
-
-  - title: "CV"
-    url: /cv/
+  # - title: "Teaching"
+  #   url: /teaching/
