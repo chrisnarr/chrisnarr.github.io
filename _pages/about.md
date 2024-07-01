@@ -1,6 +1,6 @@
 ---
 permalink: /
-title: "Hi, I'm Chris!"
+title: "Hi, I'm Chris!👋"
 author_profile: true
 redirect_from:
   - /about/
