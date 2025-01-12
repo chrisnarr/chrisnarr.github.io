@@ -1,16 +1,13 @@
 ---
 layout: page
-title: submenus
+title: Examples
 nav: true
 nav_order: 8
 dropdown: true
 children:
-  - title: publications
+  - title: Double Pendulum
     permalink: /publications/
   - title: divider
-  - title: projects
+  - title: Lorenz Attractor
     permalink: /projects/
-  - title: divider
-  - title: blog
-    permalink: /blog/
 ---

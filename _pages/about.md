@@ -1,13 +1,13 @@
 ---
 layout: about
-title: about
+title: About
 permalink: /
-subtitle: <a href='https://www.ce.cit.tum.de/en/lsr/home/'>Chair of Automatic Control Engieering</a>
+# subtitle: Subtitle text
 
 profile:
   align: right
   image: prof_pic.jpg
-  image_circular: true # crops the image to make it circular
+  image_circular: false # crops the image to make it circular
   more_info: >
     <p>Room: <a href='https://nav.tum.de/room/0105.02.512'>0105.02.512</a></p>
     <p>Theresienstraße 90</p>
