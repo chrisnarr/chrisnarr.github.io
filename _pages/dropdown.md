@@ -6,8 +6,8 @@ nav_order: 6
 dropdown: true
 children:
   - title: Double Pendulum
-    permalink: /projects/
+    permalink: /blog/2025/double_pendulum/
   - title: divider
   - title: Lorenz Attractor
-    permalink: /projects/
+    permalink: /blog/2025/lorenz_attractor/
 ---
