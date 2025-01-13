@@ -42,14 +42,14 @@ ninja.data = [{
               description: "",
               section: "Dropdown",
               handler: () => {
-                window.location.href = "";
+                window.location.href = "/blog/";
               },
             },{id: "dropdown-lorenz-attractor",
               title: "Lorenz Attractor",
               description: "",
               section: "Dropdown",
               handler: () => {
-                window.location.href = "";
+                window.location.href = "/blog/";
               },
             },{id: "post-test-post",
       
@@ -70,7 +70,18 @@ ninja.data = [{
       section: "Posts",
       handler: () => {
         
-          window.location.href = "/blog/2025/test_2/";
+          window.location.href = "/blog/2025/lorenz-attractor/";
+        
+      },
+    },{id: "post-double-pendulum",
+      
+        title: "Double Pendulum",
+      
+      description: "an example of a double pendulum",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/double-pendulum/";
         
       },
     },{id: "post-a-post-with-image-galleries",
