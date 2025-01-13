@@ -551,12 +551,12 @@ jsonresume:
   - basics
   - work
   - education
-  - publications
-  - projects
-  - volunteer
-  - awards
+  # - publications
+  # - projects
+  # - volunteer
+  # - awards
   - certificates
   - skills
   - languages
   - interests
-  - references
+  # - references
