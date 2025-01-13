@@ -62,6 +62,17 @@ ninja.data = [{
           window.location.href = "/blog/2025/test/";
         
       },
+    },{id: "post-double-pendulum",
+      
+        title: "Double Pendulum",
+      
+      description: "an example of a double pendulum",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/test_2/";
+        
+      },
     },{id: "post-a-post-with-image-galleries",
       
         title: "a post with image galleries",
