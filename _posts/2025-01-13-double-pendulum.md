@@ -7,6 +7,6 @@ date: 2025-01-13
 featured: false
 ---
 
-<div class="l-page">
+<div class="l-screen">
   <iframe src="{{ '/assets/plotly/double_pendulum' | relative_url }}" frameborder='0' scrolling='no' height="800px" width="100%" style="border: 1px dashed grey;"></iframe>
 </div>
