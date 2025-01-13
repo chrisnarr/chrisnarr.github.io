@@ -62,11 +62,11 @@ ninja.data = [{
           window.location.href = "/blog/2025/test/";
         
       },
-    },{id: "post-double-pendulum",
+    },{id: "post-lorenz-attractor",
       
-        title: "Double Pendulum",
+        title: "Lorenz Attractor",
       
-      description: "an example of a double pendulum",
+      description: "an example of a lorenz attractor",
       section: "Posts",
       handler: () => {
         
