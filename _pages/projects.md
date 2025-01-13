@@ -5,7 +5,7 @@ permalink: /projects/
 description: Here are some of my projects listed.
 nav: true
 nav_order: 3
-display_categories: [work, fun]
+display_categories: []
 horizontal: false
 ---
 
@@ -43,7 +43,7 @@ horizontal: false
 
 {% assign sorted_projects = site.projects | sort: "importance" %}
 
-  <!-- Generate cards for each project -->
+<!-- Generate cards for each project -->
 
 {% if page.horizontal %}
 
