@@ -555,8 +555,8 @@ jsonresume:
   # - projects
   # - volunteer
   # - awards
-  - certificates
-  - skills
+  # - certificates
+  # - skills
   - languages
   - interests
   # - references

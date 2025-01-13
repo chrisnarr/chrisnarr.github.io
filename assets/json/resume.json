@@ -1,6 +1,6 @@
 {
   "basics": {
-    "name": "Albert Einstein",
+    "name": "Christopher Narr",
     "label": "",
     "image": "",
     "email": "c.narr@tum.de",
@@ -177,14 +177,11 @@
   "interests": [
     {
       "name": "Physics",
-      "icon": "fa-solid fa-tag",
+      "icon": "fa-solid fa-laptop",
       "keywords": [
-        "Quantum Mechanics",
-        "Quantum Computing",
-        "Quantum Information",
-        "Quantum Cryptography",
-        "Quantum Communication",
-        "Quantum Teleportation"
+        "Brazilian Jiu Jitsu",
+        "Reading",
+        "Gaming"
       ]
     }
   ],
