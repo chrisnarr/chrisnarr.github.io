@@ -176,13 +176,17 @@
   ],
   "interests": [
     {
-      "name": "Physics",
+      "name": "Brazilian Jiu Jitsu",
       "icon": "fa-solid fa-laptop",
-      "keywords": [
-        "Brazilian Jiu Jitsu",
-        "Reading",
-        "Gaming"
-      ]
+      "keywords": []
+    },{
+      "name": "Gaming",
+      "icon": "fa-solid fa-laptop",
+      "keywords": []
+    },{
+      "name": "Reading",
+      "icon": "fa-solid fa-laptop",
+      "keywords": []
     }
   ],
   "references": [
