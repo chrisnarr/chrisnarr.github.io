@@ -18,7 +18,7 @@ selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-I'm currently a PhD student at the [Chair of Automatic Control Engieering](https://www.ce.cit.tum.de/en/lsr/home/) at [TUM](https://www.tum.de/en/).
+Hey, I'm Chris👋🏻 I'm currently a PhD student at the [Chair of Automatic Control Engieering](https://www.ce.cit.tum.de/en/lsr/home/) at [TUM](https://www.tum.de/en/).
 
 My research interests include Online Convex Optimization/Nonstochastic Control, Learning-based and Adaptive Control, and Reinforcement Learning.
 
