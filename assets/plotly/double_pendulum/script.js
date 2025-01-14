@@ -8,13 +8,16 @@ const {
 const engine = Engine.create();
 const world = engine.world;
 
+const canvas_width = 1700;
+const canvas_height = 850;
+
 // Create renderer (wider canvas to include state space visualization)
 const render = Render.create({
     element: document.body,
     engine: engine,
     options: {
-        width: 1000,
-        height: 850,
+        width: 0.7*canvas_width,
+        height: canvas_height,
         wireframes: false,
         background: '#ffffff'
     }
@@ -45,7 +48,7 @@ const link1 = Bodies.rectangle(400, 200, length, width, {
 });
 
 // Create the second link
-const link2 = Bodies.rectangle(400, 400, length, width, {
+const link2 = Bodies.rectangle(400, 500, length, width, {
     frictionAir: 0,
     chamfer: 5,
     render: {
@@ -57,9 +60,9 @@ const link2 = Bodies.rectangle(400, 400, length, width, {
 
 // Add constraints to connect the pendulum arms
 const constraint1 = Constraint.create({
-    pointA: { x: 500, y: 400 }, // Anchor point
+    pointA: { x: render.options.width/2, y: render.options.height/2 }, // Anchor point
     bodyB: link1,
-    pointB: { x: -length / 2, y: 0 },
+    pointB: { x: -length / 2 + width/2, y: 0 },
     stiffness: 1,
     length: 0,
     render: {
@@ -73,7 +76,7 @@ const constraint2 = Constraint.create({
     pointA: { x: length / 2, y: 0 },
     bodyB: link2,
     pointB: { x: -length / 2, y: 0 },
-    stiffness: 1,
+    // stiffness: 1,
     length: 0,
     render: {
         strokeStyle: '#e74c3c',
@@ -84,12 +87,12 @@ const constraint2 = Constraint.create({
 // Add the pendulum arms and constraints to the world
 Composite.add(world, [link1, link2, constraint1, constraint2]);
 
-const renderCanvas = render.canvas;  // The existing Matter.js canvas
+const renderCanvas = render.canvas;
 
 // State space visualization
 const stateSpaceCanvas = document.createElement('canvas');
-stateSpaceCanvas.width = 400;
-stateSpaceCanvas.height = 850;
+stateSpaceCanvas.width = 0.3*canvas_width;
+stateSpaceCanvas.height = canvas_height;
 stateSpaceCanvas.style.position = 'absolute';
 stateSpaceCanvas.style.left = `${renderCanvas.offsetLeft + renderCanvas.width}px`;
 stateSpaceCanvas.style.top = `${renderCanvas.offsetTop}px`;
