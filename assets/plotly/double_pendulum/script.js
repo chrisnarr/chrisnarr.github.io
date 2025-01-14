@@ -129,18 +129,18 @@ Events.on(engine, 'afterUpdate', () => {
     Render.startViewTransform(render);
     render.context.globalAlpha = 1;
 
-    // Draw the link trail
-    render.context.beginPath();
-    render.context.strokeStyle = '#e67e22'; // Trail color
-    for (let i = 0; i < linkTrail.length; i++) {
-        const point = linkTrail[i].position;
-        if (i === 0) {
-            render.context.moveTo(point.x, point.y);
-        } else {
-            render.context.lineTo(point.x, point.y);
-        }
-    }
-    render.context.stroke();
+    // // Draw the link trail
+    // render.context.beginPath();
+    // render.context.strokeStyle = '#e67e22'; // Trail color
+    // for (let i = 0; i < linkTrail.length; i++) {
+    //     const point = linkTrail[i].position;
+    //     if (i === 0) {
+    //         render.context.moveTo(point.x, point.y);
+    //     } else {
+    //         render.context.lineTo(point.x, point.y);
+    //     }
+    // }
+    // render.context.stroke();
 
     // Plot the link trail as points
     for (let i = 0; i < linkTrail.length; i += 1) {
