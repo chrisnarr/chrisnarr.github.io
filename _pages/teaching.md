@@ -4,7 +4,7 @@ permalink: /teaching/
 title: Teaching
 description: Here are the courses listed that I was involved in.
 nav: true
-nav_order: 5
+nav_order: 3
 ---
 
 The list is currently empty.
