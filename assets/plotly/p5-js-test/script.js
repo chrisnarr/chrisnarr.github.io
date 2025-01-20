@@ -1,0 +1,1 @@
+function setup(){createCanvas(400,400),x=width/2,y=height/2,xSpeed=3,ySpeed=2}function draw(){background(30),fill(100,150,255),noStroke(),ellipse(x,y,50,50),x+=xSpeed,y+=ySpeed,(x>width-25||x<25)&&(xSpeed*=-1),(y>height-25||y<25)&&(ySpeed*=-1)}let x,y,xSpeed,ySpeed;
