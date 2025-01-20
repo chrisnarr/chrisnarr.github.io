@@ -44,7 +44,18 @@ ninja.data = [{
               handler: () => {
                 window.location.href = "/blog/";
               },
-            },{id: "post-test-post",
+            },{id: "post-p5js-test",
+      
+        title: "p5js Test",
+      
+      description: "an example of",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/2025/p5-js-test/";
+        
+      },
+    },{id: "post-test-post",
       
         title: "test post",
       
@@ -53,17 +64,6 @@ ninja.data = [{
       handler: () => {
         
           window.location.href = "/blog/2025/test/";
-        
-      },
-    },{id: "post-lorenz-attractor",
-      
-        title: "Lorenz Attractor",
-      
-      description: "an example of a lorenz attractor",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/2025/p5-js-test/";
         
       },
     },{id: "post-lorenz-attractor",
