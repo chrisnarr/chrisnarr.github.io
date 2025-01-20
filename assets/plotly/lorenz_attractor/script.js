@@ -10,7 +10,7 @@ for (var i = 0; i < n; i++) {
 }
 
 // Create the initial 3D plot
-Plotly.newPlot('myDiv', [{
+Plotly.newPlot('plot', [{
     x: x,
     y: y,
     z: z,
@@ -77,29 +77,24 @@ function compute() {
 
 var frameDuration = 5; // Delay in milliseconds (higher value = slower animation)
 
-
-// Function to update the plot with new computed values
 function update() {
     compute();
-  
-    Plotly.animate('myDiv', {
-      data: [{x: x, y: y, z: z }]
+
+    Plotly.animate('plot', {
+        data: [{ x: x, y: y, z: z }]
     }, {
-      transition: {
-        duration: 1
-      },
-      frame: {
-        duration: 0,
-        redraw: false
-      }
+        transition: {
+            duration: frameDuration
+        },
+        frame: {
+            duration: frameDuration,
+            redraw: false
+        }
     });
-  
+
+    // Schedule the next frame
     requestAnimationFrame(update);
-    // // Call update after a delay (slower animation)
-    // setTimeout(function() {
-    //   requestAnimationFrame(update);
-    // }, frameDuration); // Slow down by delaying each frame
-  }
-  
-  // Start the animation loop
-  requestAnimationFrame(update);
+}
+
+// Start the animation loop
+requestAnimationFrame(update);
