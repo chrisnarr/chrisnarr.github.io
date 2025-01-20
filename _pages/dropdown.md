@@ -10,4 +10,7 @@ children:
   - title: divider
   - title: Lorenz Attractor
     permalink: /blog/2025/lorenz-attractor/
+  - title: divider
+  - title: p5.js Test
+    permalink: /blog/2025/p5-js-test/
 ---
