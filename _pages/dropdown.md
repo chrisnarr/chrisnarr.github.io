@@ -6,11 +6,11 @@ nav_order: 4
 dropdown: true
 children:
   - title: Double Pendulum
-    permalink: /blog/2025/double-pendulum/
+    permalink: /example/double-pendulum
   - title: divider
   - title: Lorenz Attractor
-    permalink: /blog/2025/lorenz-attractor/
+    permalink: /example/lorenz-attractor/
   - title: divider
   - title: p5.js Test
-    permalink: /blog/2025/p5-js-test/
+    permalink: /example/p5-js-test
 ---

@@ -2,6 +2,7 @@
 layout: distill
 title: Lorenz Attractor
 description: an example of a lorenz attractor
+permalink: /example/lorenz-attractor
 tags: distill formatting
 date: 2025-01-13
 featured: false

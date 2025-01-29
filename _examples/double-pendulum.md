@@ -2,6 +2,7 @@
 layout: distill
 title: Double Pendulum
 description: an example of a double pendulum
+permalink: /example/double-pendulum
 tags: distill formatting
 date: 2025-01-13
 featured: false

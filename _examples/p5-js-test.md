@@ -2,6 +2,7 @@
 layout: distill
 title: p5js Test
 description: an example of 
+permalink: /example/p5-js-test
 tags: distill formatting
 date: 2025-01-20
 featured: false
