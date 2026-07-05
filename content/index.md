@@ -11,7 +11,7 @@ $$
 
 
 ### Control Theory
-- [[LQR.md]]
+- [[Linear Quadratic Regulator (LQR).md]]
 - [[Transfer Functions.md]]
 
 

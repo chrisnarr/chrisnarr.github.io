@@ -5,10 +5,11 @@ publish: false
 ---
 
 >[!idea] Idea
->The transfer function describes how the output of a dynamical system reacts to the input$$G(s) = \frac{Y(s)}{U(s)}$$Thus, transfer functions are **Input-Output Models**.
-
-> [!note] Note
->Transfer functions are only possible for **LTI** systems. 
+>The transfer function describes how the output of an LTI system reacts to the input
+>$$
+>G(s) = \frac{Y(s)}{U(s)}
+>$$
+>Thus, transfer functions are **Input-Output Models**.
 
 >[!pro] PRO
 >- **Simple** analysis, e.g., stability
