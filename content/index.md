@@ -1,8 +1,8 @@
 ---
-title: Welcome to Quartz
+title: Welcome to my digital garden
 ---
 
-This is a blank Quartz installation.
+Welcome to my digital garden.
 See the [documentation](https://quartz.jzhao.xyz) for how to get started.
 
 [[test.md]]
