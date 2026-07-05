@@ -1,7 +1,7 @@
 ---
 title: Hey, I'm Chris 👋🏻
 ---
-I'm currently a third year PhD student at the [Chair of Automatic Control Engieering](https://www.ce.cit.tum.de/en/lsr/home/) at the [Technical University of Munich (TUM)](https://www.tum.de/en/).
+I'm currently a PhD student at the [Chair of Automatic Control Engieering](https://www.ce.cit.tum.de/en/lsr/home/) at the [Technical University of Munich (TUM)](https://www.tum.de/en/).
 
 My research evolves around safe and optimal control of uncertain time-varying dynamical systems.
 This includes, for example, robots with wear and tear of joint gears, electric circuits with changing resistances, or rockets which changing dynamics depending on the flight conditions.
