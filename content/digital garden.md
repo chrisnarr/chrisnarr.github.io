@@ -1,7 +1,6 @@
 ---
 title: Digital Garden
 draft: false
-publish: true
 ---
 
 Welcome to my digital garden.

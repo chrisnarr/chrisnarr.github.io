@@ -1,7 +1,6 @@
 ---
 title: Teaching
 draft: false
-publish: false
 ---
 
 Over the years, I've been involved in teaching different courses at different institutions.

@@ -1,7 +1,6 @@
 ---
 title: Transfer Functions
 draft: false
-publish: false
 ---
 
 >[!idea] Idea
