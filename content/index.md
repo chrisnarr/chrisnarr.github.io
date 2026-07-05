@@ -1,21 +1,12 @@
 ---
-title: Hey, welcome to my digital garden👋
+title: Hey, I'm Chris 👋🏻
 ---
+I'm currently a third year PhD student at the [Chair of Automatic Control Engieering](https://www.ce.cit.tum.de/en/lsr/home/) at the [Technical University of Munich (TUM)](https://www.tum.de/en/).
 
-Welcome to my digital garden.
+My research evolves around safe and optimal control of uncertain time-varying dynamical systems.
+This includes, for example, robots with wear and tear of joint gears, electric circuits with changing resistances, or rockets which changing dynamics depending on the flight conditions.
+For this, I generally use Learning-based and Adaptive Control methods, combined with concepts from other fields, such as Reinforcement Learning and Online Nonstochastic Control.
 
-The following is a test:
-$$
-f(x) = \int_{-\infty}^\infty f\hat(\xi) e^{2 \pi i \xi x} \,d\xi
-$$
+I've obtained my master's degree in [Robotics, Cognition, Intelligence](https://www.tum.de/en/studies/degree-programs/detail/robotics-cognition-intelligence-master-of-science-msc) from [TUM](https://www.tum.de/en/). During my masters, I had the opportunity to be an exchange student at the [Johou Systems Kougaku (JSK) Laboratory](http://www.jsk.t.u-tokyo.ac.jp/index.html) at the [University of Tokyo](https://www.u-tokyo.ac.jp/en/) under the supervision of [Prof. Kei Okada](https://scholar.google.co.jp/citations?user=456Oe4YAAAAJ&hl=en).
 
-
-### Control Theory
-- [[Linear Quadratic Regulator (LQR).md]]
-- [[Transfer Functions.md]]
-
-
-### Reinforcement Learning
-- [[Dynamic Programming.md]]
-- [[Model-based Reinforcement Learning.md]]
-- [[Model-free Reinforcement Learning.md]]
+Prior to that, I've been a corporate student at [Robert Bosch GmbH](https://www.bosch.de/en/), where I worked in different departments in Abstatt, Curitiba (Brazil), and Renningen.

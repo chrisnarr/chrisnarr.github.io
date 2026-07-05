@@ -1,6 +1,6 @@
 ---
 title: Dynamic Programming
-draft: false
+draft: true
 publish: false
 ---
 

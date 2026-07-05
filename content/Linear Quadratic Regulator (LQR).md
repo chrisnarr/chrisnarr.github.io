@@ -1,6 +1,6 @@
 ---
 title: Linear Quadratic Regulator (LQR)
-draft: false
+draft: true
 publish: false
 ---
 
