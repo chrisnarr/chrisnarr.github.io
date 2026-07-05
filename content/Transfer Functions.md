@@ -1,3 +1,9 @@
+---
+title: Transfer Functions
+draft: false
+publish: false
+---
+
 >[!idea] Idea
 >The transfer function describes how the output of a dynamical system reacts to the input$$G(s) = \frac{Y(s)}{U(s)}$$Thus, transfer functions are **Input-Output Models**.
 
