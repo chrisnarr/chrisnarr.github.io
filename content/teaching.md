@@ -6,7 +6,7 @@ draft: false
 Over the years, I've been involved in teaching different courses at different institutions.
 Here is a short list of the courses that I was involved in.
 
->## Automation and Robotics (AR)
+>[!note] ## Automation and Robotics (AR)
 >Taught at the [Singapore Institute of Technology (SIT)](https://www.singaporetech.edu.sg/)
 >
 >Terms: SS26
@@ -17,14 +17,14 @@ Here is a short list of the courses that I was involved in.
 >- **Inverse Kinematics:** Geometric approaches, Numerical approaches
 >- **Discrete-event Systems:** Finite Automata, Composition of Automata, Blocking, Controllability, Supervisory Control, Langauges, Petri Nets
 
->## Advanced Control and Robotics Laboratory (ACRL)
+>[!note] ## Advanced Control and Robotics Laboratory (ACRL)
 >Taught at the [Technical University of Munich (TUM)](https://www.tum.de/en/)
 >
 >Terms: SS24, SS25, SS26
 >
 >**Active Mass Damping (AMD) Experiment:** A motor-driven cart atop a flexible model building is used to first excite resonant floor vibrations via PID control, then suppress them using an LQR controller in combination with a Luenberger observer.
 
->## Computational Intelligence (CI)
+>[!note] ## Computational Intelligence (CI)
 >Taught at the [Technical University of Munich (TUM)](https://www.tum.de/en/)
 >
 >Terms: SS25
@@ -34,7 +34,7 @@ Here is a short list of the courses that I was involved in.
 >- **Fuzzy Systems:** Fuzzy Sets, Fuzzy Inference, and Fuzzy Logics
 >- **Neural Networks:** (Multi-Layer) Perceptron, Radial Basis Function Networks,  Convolutional Neural Networks, Recurrent Neural Networks
 
->## Mechatronische Systeme 2 (MTS2)
+>[!note] ## Mechatronische Systeme 2 (MTS2)
 >Taught at the [Baden-Wuerttemberg Cooperative State University (DHBW)](https://www.dhbw.de/english/home)
 >
 >Terms: SS22/SS23/SS24
@@ -43,7 +43,7 @@ Here is a short list of the courses that I was involved in.
 >- **LTI Stability Analysis:** Anaytical methods (Routh, Hurwitz), Graphical methods (Nyquist, Bode diagram)
 >- **Controller Design:** Basic controller structures for SISO systems, experimental and algebraic design methods of controllers, extended control loop structures for SISO systems
 
->## Optimal Control and Decision Making (OCDM)
+>[!note] ## Optimal Control and Decision Making (OCDM)
 >Taught at the [Technical University of Munich (TUM)](https://www.tum.de/en/)
 >
 >Terms: WS24/25, WS25/26
