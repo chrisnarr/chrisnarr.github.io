@@ -1,6 +1,5 @@
 ---
 title: An Introduction to Reinforcement Learning
-tags: 
 date: 2026-04-06 00:00:00
 ---
 
@@ -19,8 +18,7 @@ As this field continues to evolve, it opens up possibilities for smarter, more a
 
 From a mathematical point of view, an agent interacts with a system that can be defined by a transition function as
 $$
-    \label{eq:system_dynamics}
-    s_{t+1} = f(s_{t}, a_{t})
+s_{t+1} = f(s_{t}, a_{t})
 $$
 where taking the current action $a_{t}$ in state $s_{t}$ brings us into the next state $s_{t+1}$.
 Note here that the next state only depends on the current state and action.
@@ -29,8 +27,7 @@ This defines a very important property underlying almost all of Reinforcement Le
 Which action $a_t$ to take in state $s_t$ is defined by the **policy** $\pi$.
 Formally, it's a function defined as
 $$
-    \label{eq:policy}
-    a_t = \pi(s_t).
+a_t = \pi(s_t).
 $$
 By passing the current state $s_t$ to the policy, it tells us which action to take next.
 
@@ -38,13 +35,11 @@ To evaluate the performance of the agent, we need the last piece of the puzzle: 
 The reward function gives the agent a form of "feedback" whether it is performing well on a particular task or not.
 Mathematically, the reward function maps a state $s_t$ and action $a_t$ to a numerical value (the **reward**), i.e.,
 $$
-    \label{eq:reward}
-    R_{t+1} = R(s_t, a_t).
+R_{t+1} = R(s_t, a_t).
 $$
 However, the reward function only gives a reward for a single transition, but obviously we are interested in maximizing rewards over multiple time steps, which leads to the definition of the **return** as
 $$
-    \label{eq:return}
-    G_t = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}.
+G_t = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}.
 $$
 Here, $\gamma$ is the so-called **discount factor**, usually chosen as $\gamma \in [0,1)$.
 Intuitively, the discount factor allows to weight rewards in the near future stronger than rewards further away, but there are also mathematical reasons for introducing this factor (e.g., to ensure the return remains finite, but we skip this discussion for now).
@@ -54,41 +49,39 @@ Now, we are in a new state and can again apply policy $\pi$ to get the next acti
 We can repeat this process until the episode ends (or until infinity).
 The collection of state action pairs forms a trajectory (also called **rollout**), i.e.,
 $$
-    \label{eq:trajectory}
-    \tau = \{s_0, a_0, s_1, a_1, \dots \}
+\tau = \{s_0, a_0, s_1, a_1, \dots \}
 $$
 Since the system dynamics and the policy are assumed to have some randomness in them, i.e., they define probability distributions rather than deterministic functions, we also have a probability distribution over possible trajectories $\tau$ when using policy $\pi$, which is formally written as $P(\tau|\pi)$.
 
 Now, the overall goal of the agent is to tweak the policy such that it maximizes the **expected return**, which is defined as
 $$
-    \label{eq:expected_return}
-    J(\pi) = \int_\tau P(\tau|\pi) G_t = \mathbb{E}_{\tau \sim \pi}[G_t].
+J(\pi) = \int_\tau P(\tau|\pi) G_t = \mathbb{E}_{\tau \sim \pi}[G_t].
 $$
 
 Given any policy $\pi$, we can compute the expected return under the policy, leading to the definition of the **value function** as
 $$
-    V^{\pi}(s_{t}) = \mathbb{E}_{\tau \sim \pi}[G_t | s_t]
+V^{\pi}(s_{t}) = \mathbb{E}_{\tau \sim \pi}[G_t | s_t]
 $$
 which gives us the expected return of policy $\pi$ if we start in state $s_t$.
 
 A strongly related concept is the so called **action-value function** (or **Q-function**), defined as
 $$
-    Q^{\pi}(s_{t}, a_{t}) = \mathbb{E}_{\tau \sim \pi}[G_t | s_t, a_t]
+Q^{\pi}(s_{t}, a_{t}) = \mathbb{E}_{\tau \sim \pi}[G_t | s_t, a_t]
 $$
 which gives us the expected return of policy $\pi$ if we start in state $s_t$ and first choose some action $a_t$ before choosing every subsequent action according to our policy $\pi$.
 
 
 <!-- We can also formulate the relationship in a recursive fashion as
 $$
-    V^{\pi}(s_{t}) = \mathbb{E}_{\pi}[R(s_{t}, a_{t}) + \gamma V^{\pi}(s_{t+1})].
+V^{\pi}(s_{t}) = \mathbb{E}_{\pi}[R(s_{t}, a_{t}) + \gamma V^{\pi}(s_{t+1})].
 $$ -->
 
 <!-- 
 As before, this can also be reformulated in a recursive way as
 $$
-    Q^{\pi}(s_{t}, a_{t}) = \mathbb{E}_{\pi}[R(s_{t}, a_{t}) + \gamma Q^{\pi}(s_{t+1}, a_{t+1})].
+Q^{\pi}(s_{t}, a_{t}) = \mathbb{E}_{\pi}[R(s_{t}, a_{t}) + \gamma Q^{\pi}(s_{t+1}, a_{t+1})].
 $$
-test
 
 Based on all concepts introduced so far, there are now two ways we can take.
-Either, we directly try to maximize $J(\pi)$ by adjusting the policy $\pi$ (leading to **Policy Gradient** methods), or, we try to estimate the expected future return via the value function or action-value function (leading to **Value-based methods**). -->
+Either, we directly try to maximize $J(\pi)$ by adjusting the policy $\pi$ (leading to **Policy Gradient** methods), or, we try to estimate the expected future return via the value function or action-value function (leading to **Value-based methods**).
+-->
