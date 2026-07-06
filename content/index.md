@@ -15,7 +15,7 @@ Prior to that, I've been a corporate student at [Robert Bosch GmbH](https://www.
 ## Entry Points
 - [[Teaching.md]]
 - [[Digital Garden.md]]
-- [[RL_Intro.md]]
+- [[An Introduction to Reinforcement Learning | RL_Intro.md]]
 
 ---
 
