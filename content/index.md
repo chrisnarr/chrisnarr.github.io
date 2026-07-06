@@ -13,8 +13,8 @@ I've obtained my master's degree in [Robotics, Cognition, Intelligence](https://
 Prior to that, I've been a corporate student at [Robert Bosch GmbH](https://www.bosch.de/en/), where I worked in different departments in Abstatt, Curitiba (Brazil), and Renningen.
 
 ## Entry Points
-- [[Teaching.md]]
-- [[Digital Garden.md]]
+- [[Teaching.md|Teaching]]
+- [[Digital Garden.md|Digital Garden]]
 - [[RL_Intro.md|An Introduction to Reinforcement Learning]]
 
 ---
