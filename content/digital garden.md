@@ -12,18 +12,18 @@ Welcome to my digital garden 🌳
 - NARX
 - ARMAX
 - State Space Models
-- [[Transfer Functions|Transfer Functions.md]]
+- [[Transfer Functions.md|Transfer Functions]]
 
 ### Control Theory
-- [[Linear Quadratic Regulator (LQR)|Linear Quadratic Regulator (LQR).md]]
-- [[Lyapunov Functions|Lyapunov Functions.md]]
-- [[Control Lyapunov Functions|Control Lyapunov Functions.md]]
-- [[Barrier Functions|Barrier Functions.md]]
-- [[Control Barrier Functions|Control Barrier Functions.md]]
+- [[Linear Quadratic Regulator (LQR).md|Linear Quadratic Regulator (LQR)]]
+- [[Lyapunov Functions.md|Lyapunov Functions]]
+- [[Control Lyapunov Functions.md|Control Lyapunov Functions]]
+- [[Barrier Functions.md|Barrier Functions]]
+- [[Control Barrier Functions.md|Control Barrier Functions]]
 
 ### Reinforcement Learning
-- [[Dynamic Programming|Dynamic Programming.md]]
+- [[Dynamic Programming.md|Dynamic Programming]]
 - Bellman Equation
-- [[Reinforcement Learning|Reinforcement Learning.md]]
-- [[Model-based Reinforcement Learning|Model-based Reinforcement Learning.md]]
-- [[Model-free Reinforcement Learning|Model-free Reinforcement Learning.md]]
+- [[Reinforcement Learning.md|Reinforcement Learning]]
+- [[Model-based Reinforcement Learning.md|Model-based Reinforcement Learning]]
+- [[Model-free Reinforcement Learning.md|Model-free Reinforcement Learning]]
