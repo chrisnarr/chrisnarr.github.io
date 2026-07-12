@@ -1,7 +1,6 @@
 ---
 title: Hey, I'm Chris 👋🏻
-cssclasses:
-  - hide-meta
+cssclasses: hide-meta
 ---
 I'm currently a PhD student at the [Chair of Automatic Control Engieering](https://www.ce.cit.tum.de/en/lsr/home/) at the [Technical University of Munich (TUM)](https://www.tum.de/en/).
 

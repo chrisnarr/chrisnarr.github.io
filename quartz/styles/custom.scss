@@ -12,7 +12,9 @@
 
 // Hides ContentMeta metadata
 body.hide-meta {
-  .content-meta {
-    display: none;
+  .page-header {
+    .content-meta {
+      display: none !important;
+    }
   }
 }
