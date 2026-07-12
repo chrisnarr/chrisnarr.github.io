@@ -1,5 +1,6 @@
 ---
 title: Teaching
+cssclasses: hide-meta
 draft: false
 ---
 

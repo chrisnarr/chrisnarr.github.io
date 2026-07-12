@@ -1,5 +1,6 @@
 ---
 title: Digital Garden
+cssclasses: hide-meta
 draft: false
 ---
 
