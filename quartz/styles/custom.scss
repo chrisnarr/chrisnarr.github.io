@@ -10,8 +10,8 @@
   }
 }
 
-// Hides ContentMeta metadata
-body.hide-meta {
+// Hides metadata globally inside any layout that has the hide-meta flag on its article
+div.center:has(article.hide-meta) {
   .page-header {
     .content-meta {
       display: none !important;
