@@ -9,3 +9,10 @@
     --callout-icon: url("data:image/svg+xml; utf8, <custom formatted svg>"); //SVG icon code
   }
 }
+
+// Hides ContentMeta metadata
+body.hide-meta {
+  .content-meta {
+    display: none;
+  }
+}
