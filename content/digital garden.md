@@ -1,7 +1,7 @@
 ---
 title: Digital Garden
 cssclasses: hide-meta
-draft: false
+draft: true
 ---
 
 Welcome to my digital garden 🌳
