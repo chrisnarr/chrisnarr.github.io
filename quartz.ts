@@ -1,15 +1,15 @@
 import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
-import * as ExternalPlugin from "./.quartz/plugins"
+// import * as ExternalPlugin from "./.quartz/plugins"
 
-ExternalPlugin.Explorer({
-  mapFn: (node) => {
-    if (node.isFolder) {
-      node.displayName = "📁 " + node.displayName
-    } else {
-      node.displayName = "📄 " + node.displayName
-    }
-  },
-})
+// ExternalPlugin.Explorer({
+//   mapFn: (node) => {
+//     if (node.isFolder) {
+//       node.displayName = "📁 " + node.displayName
+//     } else {
+//       node.displayName = "📄 " + node.displayName
+//     }
+//   },
+// })
 
 const config = await loadQuartzConfig()
 export default config
