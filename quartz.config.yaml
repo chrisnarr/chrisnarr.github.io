@@ -87,8 +87,11 @@ plugins:
       renderEngine: mathjax
     order: 80
   - source: github:quartz-community/citations
-    enabled: false
+    enabled: true
     order: 85
+    options:
+      bibliographyFile: "./bibliography.bib"
+      csl: apa
   - source: github:quartz-community/hard-line-breaks
     enabled: false
     order: 90
@@ -254,6 +257,14 @@ plugins:
       position: beforeBody
       priority: 15
       display: all
+  - source: github:quartz-community/citations
+    enabled: false
+    options:
+      bibliographyFile: ./bibliography.bib
+      suppressBibliography: false
+      linkCitations: false
+      csl: apa
+    order: 85
 layout:
   groups:
     toolbar:

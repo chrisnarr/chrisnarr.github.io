@@ -1,14 +1,15 @@
 ---
 title: Digital Garden
 cssclasses: hide-meta
-draft: true
+draft: false
 ---
 
 Welcome to my digital garden 🌳
 
-### System Theory
+### System Classes
 - FIR
 - IIR
+- AR
 - ARX
 - NARX
 - ARMAX
@@ -17,6 +18,7 @@ Welcome to my digital garden 🌳
 
 ### Control Theory
 - [[Linear Quadratic Regulator (LQR).md|Linear Quadratic Regulator (LQR)]]
+- [[Model Predictive Control (MPC).md|Model Predictive Control (MPC)]]
 - [[Lyapunov Functions.md|Lyapunov Functions]]
 - [[Control Lyapunov Functions.md|Control Lyapunov Functions]]
 - [[Barrier Functions.md|Barrier Functions]]
@@ -26,5 +28,5 @@ Welcome to my digital garden 🌳
 - [[Dynamic Programming.md|Dynamic Programming]]
 - Bellman Equation
 - [[Reinforcement Learning.md|Reinforcement Learning]]
-- [[Model-based Reinforcement Learning.md|Model-based Reinforcement Learning]]
-- [[Model-free Reinforcement Learning.md|Model-free Reinforcement Learning]]
+    - [[Model-free Reinforcement Learning.md|Model-free Reinforcement Learning]]
+    - [[Model-based Reinforcement Learning.md|Model-based Reinforcement Learning]]

@@ -40,8 +40,8 @@
     "citations": {
       "source": "github:quartz-community/citations",
       "resolved": "https://github.com/quartz-community/citations.git",
-      "commit": "2ad133a123c5b15b7c41d4fb684d422622113081",
-      "installedAt": "2026-07-05T15:38:16.739Z"
+      "commit": "07849b8cfb82d2b0c937989653adf1b75d466ce9",
+      "installedAt": "2026-09-22T19:23:07.034Z"
     },
     "cname": {
       "source": "github:quartz-community/cname",
