@@ -6,7 +6,6 @@ cssclasses: hide-meta
 <div style="text-align: center">
     <img src="./img.jpg" width="300" height="300" />
 </div>
-
 I'm currently a PhD student at the [Chair of Automatic Control Engieering](https://www.ce.cit.tum.de/en/lsr/home/) at the [Technical University of Munich (TUM)](https://www.tum.de/en/).
 
 My research evolves around safe and optimal control of uncertain time-varying dynamical systems.
