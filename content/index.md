@@ -16,10 +16,6 @@ I've obtained my master's degree in [Robotics, Cognition, Intelligence](https://
 
 Prior to that, I've been a corporate student at [Robert Bosch GmbH](https://www.bosch.de/en/), where I worked in different departments in Abstatt, Curitiba (Brazil), and Renningen.
 
-## Entry Points
-- [[Teaching.md|Teaching]]
-- [[RL_Intro.md|An Introduction to Reinforcement Learning]]
-
 ---
 
 **Social Media:** [GitHub](https://github.com/chrisnarr), [LinkedIn](https://www.linkedin.com/in/christopher-narr/), [Google Scholar](https://scholar.google.com/citations?user=aOMgEOUAAAAJ)
