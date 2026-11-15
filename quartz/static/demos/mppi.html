@@ -960,6 +960,7 @@
         ctx.fill()
         ctx.restore()
 
+        const essPct = (100 * stats.ess) / P.K
         document.getElementById("status").textContent =
           `v ${robot.v.toFixed(2)} m/s  ω ${robot.w.toFixed(2)} rad/s\n` +
           `dist ${Math.hypot(robot.x - goal.x, robot.y - goal.y).toFixed(2)} m` +
@@ -967,7 +968,7 @@
             ? `  reached ${goalsReached}` + (goalsSkipped ? ` skipped ${goalsSkipped}` : "")
             : "") +
           "\n" +
-          `ESS/K ${(stats.ess / P.K).toFixed(3)}  crashed ${(stats.crashedFrac * 100).toFixed(0)}%\n` +
+          `ESS/K ${essPct.toFixed(2)}%  crashed ${(stats.crashedFrac * 100).toFixed(0)}%\n` +
           `solve ${stats.ms.toFixed(1)} ms`
 
         drawInputPlots()
