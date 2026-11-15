@@ -272,7 +272,7 @@
 
       <div class="bar">
         <button id="play" class="primary">Pause</button>
-        <button id="resetRobot">Reset robot</button>
+        <button id="resetRobot">Reset environment</button>
         <button id="addObs">Add obstacle</button>
         <button id="shuffle">Random obstacles</button>
         <button id="defaults">Default parameters</button>
@@ -659,6 +659,44 @@
         legTime = 0
       }
 
+      // Fully random scenario: random robot pose, a target well away from it that the robot
+      // roughly faces, and fresh obstacles that keep clear of both (see validSpot).
+      function resetEnvironment() {
+        const m = 1.2 // keep robot and target away from the walls
+        const minDist = 5 // [m] between robot and target
+        let rx, ry, gx, gy
+        for (let i = 0; i < 500; i++) {
+          rx = m + Math.random() * (WORLD.w - 2 * m)
+          ry = m + Math.random() * (WORLD.h - 2 * m)
+          gx = m + Math.random() * (WORLD.w - 2 * m)
+          gy = m + Math.random() * (WORLD.h - 2 * m)
+          if (Math.hypot(gx - rx, gy - ry) >= minDist) break
+        }
+        const offset = ((Math.random() - 0.5) * Math.PI) / 3 // ±30° from the target direction
+        Object.assign(robot, {
+          x: rx,
+          y: ry,
+          th: Math.atan2(gy - ry, gx - rx) + offset,
+          v: 0,
+          w: 0,
+        })
+        robot.th = Math.atan2(Math.sin(robot.th), Math.cos(robot.th))
+        goal.x = gx
+        goal.y = gy
+        randomizeObstacles(true)
+        U.fill(0)
+        trail = []
+        legTime = 0
+        goalsReached = 0
+        goalsSkipped = 0
+        stats.ess = 0
+        stats.crashedFrac = 0
+        // drop the old rollouts and plan so nothing stale is drawn (buffers are re-created)
+        PLAN = null
+        PLAN_U = null
+        bufK = 0
+      }
+
       // obstacles dragged onto the robot push it away instead of trapping it
       function resolveRobotCollisions() {
         for (const o of obstacles) {
@@ -781,6 +819,42 @@
         ctx.stroke()
       }
 
+      // ---------------------------------------------------------------------
+      // Sample styling, shared by the map and the input plots
+      // ---------------------------------------------------------------------
+      function maxWeight() {
+        let m = 0
+        for (let k = 0; k < P.K; k++) if (Wt[k] > m) m = Wt[k]
+        return m
+      }
+
+      // Indices of the samples to draw: an evenly strided subset plus the 10 highest-weight
+      // samples, sorted lightest first so the heaviest end up on top.
+      function sampleOrder(maxDraw) {
+        const K = P.K
+        const top = []
+        for (let k = 0; k < K; k++) {
+          if (top.length < 10 || Wt[k] > Wt[top[top.length - 1]]) {
+            top.push(k)
+            top.sort((a, b) => Wt[b] - Wt[a])
+            if (top.length > 10) top.pop()
+          }
+        }
+        const set = new Set(top)
+        const stride = Math.max(1, Math.floor(K / maxDraw))
+        for (let k = 0; k < K; k += stride) set.add(k)
+        return [...set].sort((a, b) => Wt[a] - Wt[b])
+      }
+
+      // Opacity and width from the relative weight rel = w_k / max_j w_j. The curve is
+      // steeper than linear (rel^2), so only the few dominant samples stand out and the rest
+      // form a faint haze that still shows the spread of the sampling distribution.
+      function weightStyle(rel, crashed, haze) {
+        if (crashed) return { color: withAlpha(COLORS.danger, 2 * haze), lw: 1 }
+        const e = rel * rel
+        return { color: withAlpha(COLORS.secondary, haze + (0.95 - haze) * e), lw: 1 + 1.25 * e }
+      }
+
       function draw() {
         if (!COLORS.light) return
         const wCss = cv.width / (window.devicePixelRatio || 1)
@@ -803,19 +877,13 @@
 
         // sampled rollouts
         if (opt.samples && TRAJ && bufK === P.K && bufT === P.T) {
-          const K = P.K,
-            T = P.T
-          const maxDraw = 250
-          const stride = Math.max(1, Math.floor(K / maxDraw))
-          let wMax = 0
-          for (let k = 0; k < K; k++) if (Wt[k] > wMax) wMax = Wt[k]
-          ctx.lineWidth = 1.25
-          for (let k = 0; k < K; k += stride) {
+          const T = P.T
+          const wMax = maxWeight()
+          for (const k of sampleOrder(250)) {
             const tb = k * (T + 1) * 2
-            const rel = wMax > 0 ? Wt[k] / wMax : 0
-            ctx.strokeStyle = CRASH[k]
-              ? withAlpha(COLORS.danger, 0.3)
-              : withAlpha(COLORS.secondary, 0.2 + 0.7 * Math.sqrt(rel))
+            const st = weightStyle(wMax > 0 ? Wt[k] / wMax : 0, CRASH[k], 0.1)
+            ctx.lineWidth = st.lw
+            ctx.strokeStyle = st.color
             ctx.beginPath()
             ctx.moveTo(X(TRAJ[tb]), Y(TRAJ[tb + 1]))
             for (let t = 1; t <= T; t++) ctx.lineTo(X(TRAJ[tb + 2 * t]), Y(TRAJ[tb + 2 * t + 1]))
@@ -949,24 +1017,8 @@
         const T = P.T
         const haveData = CTRL && PLAN_U && bufK === P.K && bufT === T && PLAN_U.length === T * 2
         const horizon = T * DT
-        let wMax = 0
-        if (haveData) for (let k = 0; k < P.K; k++) if (Wt[k] > wMax) wMax = Wt[k]
-        const stride = Math.max(1, Math.floor(P.K / 120))
-        // a strided subset plus the 10 highest-weight samples, drawn lightest first
-        let order = []
-        if (haveData) {
-          const top = []
-          for (let k = 0; k < P.K; k++) {
-            if (top.length < 10 || Wt[k] > Wt[top[top.length - 1]]) {
-              top.push(k)
-              top.sort((a, b) => Wt[b] - Wt[a])
-              if (top.length > 10) top.pop()
-            }
-          }
-          const set = new Set(top)
-          for (let k = 0; k < P.K; k += stride) set.add(k)
-          order = [...set].sort((a, b) => Wt[a] - Wt[b])
-        }
+        const wMax = haveData ? maxWeight() : 0
+        const order = haveData ? sampleOrder(120) : []
 
         for (const p of PLOTS) {
           const c = p.ctx
@@ -1029,11 +1081,9 @@
           // haze and the high-weight ones on top of it)
           if (opt.samples) {
             for (const k of order) {
-              const rel = wMax > 0 ? Wt[k] / wMax : 0
-              c.lineWidth = rel > 0.3 ? 1.75 : 1
-              c.strokeStyle = CRASH[k]
-                ? withAlpha(COLORS.danger, 0.12)
-                : withAlpha(COLORS.secondary, 0.05 + 0.8 * rel)
+              const st = weightStyle(wMax > 0 ? Wt[k] / wMax : 0, CRASH[k], 0.05)
+              c.lineWidth = st.lw
+              c.strokeStyle = st.color
               c.beginPath()
               const b = k * T * 2 + p.ch
               c.moveTo(px(0), py(CTRL[b]))
@@ -1278,10 +1328,7 @@
         acc = 0
       })
       document.getElementById("resetRobot").addEventListener("click", () => {
-        Object.assign(robot, { x: 1.2, y: 4, th: 0, v: 0, w: 0 })
-        U.fill(0)
-        trail = []
-        resolveRobotCollisions()
+        resetEnvironment()
         draw()
       })
       document.getElementById("addObs").addEventListener("click", () => {
