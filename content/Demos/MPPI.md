@@ -4,11 +4,12 @@ date: 2026-11-15 00:00:00
 draft: false
 ---
 
-<iframe src="/static/demos/mppi.html" title="MPPI simulator" style="width: 100%; height: 760px; border: none;" loading="lazy"></iframe>
+<iframe src="/static/demos/mppi.html" title="MPPI simulator" style="width: 100%; height: 1000px; border: none;" loading="lazy"></iframe>
 
 **Click** anywhere to set the target, **drag** the obstacles around, **double-click** an obstacle to remove it, and **scroll** over an obstacle to resize it.
 **Auto mode** (on by default) generates a new target, roughly ahead of the robot, and new obstacles every time the robot reaches the target; turn it off to place targets yourself.
 The thin lines are the sampled rollouts (darker means a higher weight, red means the sample crashed), and the thick line is the resulting optimal plan.
+The two plots below the map show the same samples in input space: the sampled sequences of $v$ and $\omega$ over the horizon, with the same weight-based shading, and the optimal (weighted-average) input sequence on top. Hover over a plot to read off the optimal input at a given time.
 
 ## Short Explanation
 

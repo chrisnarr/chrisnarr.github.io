@@ -145,6 +145,60 @@
         color: var(--light);
         opacity: 0.9;
       }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 16px;
+        margin: 10px 0 4px;
+        font-size: 13px;
+        color: var(--darkgray);
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .sw {
+        display: inline-block;
+        width: 18px;
+        height: 0;
+        border-top: 2px solid var(--secondary);
+      }
+      .sw-samples {
+        border-top-color: color-mix(in srgb, var(--secondary) 45%, transparent);
+      }
+      .sw-crash {
+        border-top-color: var(--danger);
+        opacity: 0.6;
+      }
+      .sw-plan {
+        border-top-width: 3.5px;
+      }
+      .sw-limit {
+        border-top: 1.5px dashed var(--gray);
+      }
+      .plots {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 8px 12px;
+      }
+      .plot {
+        min-width: 0;
+        margin: 0;
+        border: 1px solid var(--lightgray);
+        border-radius: 8px;
+        padding: 6px 8px 4px;
+      }
+      .plot figcaption {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 2px;
+      }
+      .plot canvas {
+        height: 150px;
+        cursor: default;
+      }
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -191,6 +245,31 @@
         <div id="status" class="overlay"></div>
       </div>
 
+      <div class="legend" aria-hidden="true">
+        <span><i class="sw sw-samples"></i>Sampled inputs (opacity = weight)</span>
+        <span><i class="sw sw-crash"></i>Crashed samples</span>
+        <span><i class="sw sw-plan"></i>Optimal sequence</span>
+        <span><i class="sw sw-limit"></i>Input limits</span>
+      </div>
+      <div class="plots">
+        <figure class="plot">
+          <figcaption>Linear velocity <i>v</i> [m/s] over the horizon</figcaption>
+          <canvas
+            id="pv"
+            role="img"
+            aria-label="Sampled and optimal linear velocity sequences over the horizon"
+          ></canvas>
+        </figure>
+        <figure class="plot">
+          <figcaption>Angular velocity <i>ω</i> [rad/s] over the horizon</figcaption>
+          <canvas
+            id="pw"
+            role="img"
+            aria-label="Sampled and optimal angular velocity sequences over the horizon"
+          ></canvas>
+        </figure>
+      </div>
+
       <div class="bar">
         <button id="play" class="primary">Pause</button>
         <button id="resetRobot">Reset robot</button>
@@ -214,11 +293,11 @@
           <input id="sL" type="range" min="-3" max="2" step="0.01"
         /></label>
         <label class="slider"
-          >Noise σ<sub>v</sub> <span class="val" id="vSv"></span>
+          ><span>Noise σ<sub>v</sub></span> <span class="val" id="vSv"></span>
           <input id="sSv" type="range" min="0.05" max="2" step="0.05"
         /></label>
         <label class="slider"
-          >Noise σ<sub>ω</sub> <span class="val" id="vSw"></span>
+          ><span>Noise σ<sub>ω</sub></span> <span class="val" id="vSw"></span>
           <input id="sSw" type="range" min="0.05" max="4" step="0.05"
         /></label>
         <label class="slider"
@@ -290,6 +369,8 @@
       // ---------------------------------------------------------------------
       let U = new Float32Array(P.T * 2) // nominal control sequence [v, w]
       let EPS, S, Wt, TRAJ, CRASH, PLAN
+      let CTRL // sampled (clamped) inputs [v, w] per sample and step, for the input plots
+      let PLAN_U // updated nominal input sequence (before the shift), for the input plots
       let bufK = 0,
         bufT = 0
 
@@ -309,6 +390,8 @@
         TRAJ = new Float32Array(P.K * (P.T + 1) * 2)
         CRASH = new Uint8Array(P.K)
         PLAN = new Float32Array((P.T + 1) * 2)
+        CTRL = new Float32Array(P.K * P.T * 2)
+        PLAN_U = new Float32Array(P.T * 2)
       }
 
       // ---------------------------------------------------------------------
@@ -379,6 +462,8 @@
               ew = w - u1
             EPS[i] = ev
             EPS[i + 1] = ew
+            CTRL[i] = v
+            CTRL[i + 1] = w
 
             if (!dead) {
               // unicycle kinematics (forward Euler)
@@ -475,6 +560,8 @@
         stats.minCost = minS
         stats.crashedFrac = nCrash / K
         stats.ms = performance.now() - t0
+
+        PLAN_U.set(U)
 
         // first control to apply, then shift the sequence (warm start)
         const u = [U[0], U[1]]
@@ -814,6 +901,210 @@
           "\n" +
           `ESS/K ${(stats.ess / P.K).toFixed(3)}  crashed ${(stats.crashedFrac * 100).toFixed(0)}%\n` +
           `solve ${stats.ms.toFixed(1)} ms`
+
+        drawInputPlots()
+      }
+
+      // ---------------------------------------------------------------------
+      // Input plots: sampled and optimal input sequences over the horizon
+      // ---------------------------------------------------------------------
+      const PLOTS = [
+        {
+          cv: document.getElementById("pv"),
+          ch: 0,
+          lo: V_MIN,
+          hi: V_MAX,
+          ticks: [-0.5, 0, 0.5, 1, 1.5],
+          name: "v*",
+          unit: "m/s",
+        },
+        {
+          cv: document.getElementById("pw"),
+          ch: 1,
+          lo: -W_MAX,
+          hi: W_MAX,
+          ticks: [-2, -1, 0, 1, 2],
+          name: "ω*",
+          unit: "rad/s",
+        },
+      ]
+      for (const p of PLOTS) p.ctx = p.cv.getContext("2d")
+      const PM = { l: 36, r: 8, t: 6, b: 20 } // plot margins [px]
+      let hoverStep = null // horizon step under the pointer, shared by both plots
+
+      function resizePlots() {
+        const dpr = window.devicePixelRatio || 1
+        for (const p of PLOTS) {
+          const w = p.cv.clientWidth,
+            h = p.cv.clientHeight
+          p.w = w
+          p.h = h
+          p.cv.width = Math.round(w * dpr)
+          p.cv.height = Math.round(h * dpr)
+          p.ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+        }
+      }
+
+      function drawInputPlots() {
+        const T = P.T
+        const haveData = CTRL && PLAN_U && bufK === P.K && bufT === T && PLAN_U.length === T * 2
+        const horizon = T * DT
+        let wMax = 0
+        if (haveData) for (let k = 0; k < P.K; k++) if (Wt[k] > wMax) wMax = Wt[k]
+        const stride = Math.max(1, Math.floor(P.K / 120))
+        // a strided subset plus the 10 highest-weight samples, drawn lightest first
+        let order = []
+        if (haveData) {
+          const top = []
+          for (let k = 0; k < P.K; k++) {
+            if (top.length < 10 || Wt[k] > Wt[top[top.length - 1]]) {
+              top.push(k)
+              top.sort((a, b) => Wt[b] - Wt[a])
+              if (top.length > 10) top.pop()
+            }
+          }
+          const set = new Set(top)
+          for (let k = 0; k < P.K; k += stride) set.add(k)
+          order = [...set].sort((a, b) => Wt[a] - Wt[b])
+        }
+
+        for (const p of PLOTS) {
+          const c = p.ctx
+          if (!p.w) continue
+          const pad = 0.12 * (p.hi - p.lo)
+          const yLo = p.lo - pad,
+            yHi = p.hi + pad
+          const x0 = PM.l,
+            x1 = p.w - PM.r,
+            y0 = PM.t,
+            y1 = p.h - PM.b
+          const px = (t) => x0 + ((t * DT) / horizon) * (x1 - x0)
+          const py = (u) => y1 - ((u - yLo) / (yHi - yLo)) * (y1 - y0)
+
+          c.fillStyle = COLORS.light
+          c.fillRect(0, 0, p.w, p.h)
+
+          // grid + y tick labels
+          c.font = '11px "IBM Plex Mono", ui-monospace, monospace'
+          c.textBaseline = "middle"
+          c.textAlign = "right"
+          c.lineWidth = 1
+          for (const v of p.ticks) {
+            const y = Math.round(py(v)) + 0.5
+            c.strokeStyle = v === 0 ? COLORS.gray : withAlpha(COLORS.lightgray, 0.9)
+            c.beginPath()
+            c.moveTo(x0, y)
+            c.lineTo(x1, y)
+            c.stroke()
+            c.fillStyle = COLORS.darkgray
+            c.fillText(String(v), x0 - 5, y)
+          }
+          // x tick labels (seconds into the future)
+          c.textAlign = "center"
+          c.textBaseline = "top"
+          const xStep = horizon > 3 ? 1 : 0.5
+          for (let s = 0; s <= horizon + 1e-9; s += xStep) {
+            const x = x0 + (s / horizon) * (x1 - x0)
+            c.textAlign = x > x1 - 12 ? "right" : "center"
+            c.fillStyle = COLORS.darkgray
+            c.fillText(s === 0 ? "0 s" : String(+s.toFixed(1)), x, y1 + 5)
+          }
+
+          // input limits
+          c.strokeStyle = COLORS.gray
+          c.lineWidth = 1.5
+          c.setLineDash([5, 4])
+          for (const v of [p.lo, p.hi]) {
+            c.beginPath()
+            c.moveTo(x0, py(v))
+            c.lineTo(x1, py(v))
+            c.stroke()
+          }
+          c.setLineDash([])
+
+          if (!haveData) continue
+
+          // sampled sequences, same color/weight encoding as the map
+          // (inputs are white noise per step, so low-weight samples are drawn as a faint
+          // haze and the high-weight ones on top of it)
+          if (opt.samples) {
+            for (const k of order) {
+              const rel = wMax > 0 ? Wt[k] / wMax : 0
+              c.lineWidth = rel > 0.3 ? 1.75 : 1
+              c.strokeStyle = CRASH[k]
+                ? withAlpha(COLORS.danger, 0.12)
+                : withAlpha(COLORS.secondary, 0.05 + 0.8 * rel)
+              c.beginPath()
+              const b = k * T * 2 + p.ch
+              c.moveTo(px(0), py(CTRL[b]))
+              for (let t = 1; t < T; t++) c.lineTo(px(t), py(CTRL[b + 2 * t]))
+              c.stroke()
+            }
+          }
+
+          // optimal (weighted-average) sequence
+          if (opt.plan) {
+            c.lineJoin = "round"
+            c.lineCap = "round"
+            c.beginPath()
+            c.moveTo(px(0), py(PLAN_U[p.ch]))
+            for (let t = 1; t < T; t++) c.lineTo(px(t), py(PLAN_U[2 * t + p.ch]))
+            c.strokeStyle = COLORS.light
+            c.lineWidth = 6
+            c.stroke()
+            c.strokeStyle = COLORS.secondary
+            c.lineWidth = 3
+            c.stroke()
+          }
+
+          // hover crosshair + readout
+          if (hoverStep !== null && hoverStep < T) {
+            const x = Math.round(px(hoverStep)) + 0.5
+            const val = PLAN_U[2 * hoverStep + p.ch]
+            c.strokeStyle = COLORS.darkgray
+            c.lineWidth = 1
+            c.beginPath()
+            c.moveTo(x, y0)
+            c.lineTo(x, y1)
+            c.stroke()
+            c.beginPath()
+            c.arc(x, py(val), 4.5, 0, 2 * Math.PI)
+            c.fillStyle = COLORS.secondary
+            c.fill()
+            c.lineWidth = 2
+            c.strokeStyle = COLORS.light
+            c.stroke()
+
+            const label = `t+${(hoverStep * DT).toFixed(2)} s  ${p.name} ${val.toFixed(2)} ${p.unit}`
+            c.font = '12px "IBM Plex Mono", ui-monospace, monospace'
+            const tw = c.measureText(label).width + 12
+            const bx = Math.min(Math.max(x - tw / 2, x0), x1 - tw)
+            c.fillStyle = withAlpha(COLORS.light, 0.92)
+            c.strokeStyle = COLORS.lightgray
+            c.lineWidth = 1
+            c.beginPath()
+            c.roundRect ? c.roundRect(bx, y0, tw, 20, 4) : c.rect(bx, y0, tw, 20)
+            c.fill()
+            c.stroke()
+            c.fillStyle = COLORS.dark
+            c.textAlign = "left"
+            c.textBaseline = "middle"
+            c.fillText(label, bx + 6, y0 + 10)
+          }
+        }
+      }
+
+      for (const p of PLOTS) {
+        p.cv.addEventListener("pointermove", (ev) => {
+          const r = p.cv.getBoundingClientRect()
+          const f = (ev.clientX - r.left - PM.l) / (r.width - PM.l - PM.r)
+          hoverStep = f < 0 || f > 1 ? null : clamp(Math.round(f * P.T), 0, P.T - 1)
+          if (!running) draw()
+        })
+        p.cv.addEventListener("pointerleave", () => {
+          hoverStep = null
+          if (!running) draw()
+        })
       }
 
       // ---------------------------------------------------------------------
@@ -1060,6 +1351,11 @@
       readColors()
       watchTheme()
       new ResizeObserver(resize).observe(document.getElementById("stage"))
+      new ResizeObserver(() => {
+        resizePlots()
+        draw()
+      }).observe(document.querySelector(".plots"))
+      resizePlots()
       new ResizeObserver(fitFrame).observe(document.body)
       resize()
       requestAnimationFrame(frame)
