@@ -13,10 +13,12 @@ The thin lines are the sampled rollouts (darker means a higher weight, red means
 ## Short Explanation
 
 The robot is a unicycle with dynamics
+
 $$
 \dot p_x = v \cos\theta, \qquad \dot p_y = v \sin\theta, \qquad \dot\theta = \omega .
 $$
-with state $x = [p_x, p_y, \theta]^\top$ with position $p = (p_x, p_y)$ and heading angle $\theta, and input $u = [v, \omega]^\top$ with linear velocity $v$ and angular velocity $\omega$.
+
+with state $x = [p_x, p_y, \theta]^\top$ with position $p = (p_x, p_y)$ and heading angle $\theta$, and input $u = [v, \omega]^\top$ with linear velocity $v$ and angular velocity $\omega$.
 
 MPPI is a sampling-based model predictive controller.
 It keeps a nominal control sequence $U = (u_0, \dots, u_{T-1})$ over a horizon of $T$ steps, and at every control step it

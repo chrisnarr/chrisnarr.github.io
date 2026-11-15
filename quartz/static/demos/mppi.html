@@ -69,26 +69,46 @@
         width: 100%;
         cursor: crosshair;
       }
-      #hint {
+      .overlay {
         position: absolute;
-        left: 8px;
-        bottom: 6px;
-        font-size: 12px;
-        color: var(--gray);
+        padding: 5px 9px;
+        border: 1px solid var(--lightgray);
+        border-radius: 6px;
+        background: var(--light);
+        background: color-mix(in srgb, var(--light) 88%, transparent);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        color: var(--dark);
         pointer-events: none;
         user-select: none;
       }
-      #status {
-        position: absolute;
+      #hint {
+        left: 8px;
+        bottom: 8px;
         right: 8px;
-        top: 6px;
+        width: fit-content;
+        font-size: 14px;
+        line-height: 1.35;
+      }
+      #hint b {
+        font-weight: 600;
+        color: var(--secondary);
+      }
+      #status {
+        right: 8px;
+        top: 8px;
         font-family: "IBM Plex Mono", ui-monospace, monospace;
-        font-size: 11px;
-        color: var(--gray);
+        font-size: 12.5px;
         text-align: right;
-        pointer-events: none;
-        line-height: 1.45;
+        line-height: 1.5;
         white-space: pre;
+      }
+      @media (max-width: 520px) {
+        #hint {
+          font-size: 12px;
+        }
+        #status {
+          font-size: 11px;
+        }
       }
       .bar {
         display: flex;
@@ -164,10 +184,11 @@
     <div id="wrap">
       <div id="stage">
         <canvas id="cv"></canvas>
-        <div id="hint">
-          Click: set target · Drag: move obstacle · Double-click: remove · Scroll: resize
+        <div id="hint" class="overlay">
+          <b>Click</b> set target · <b>Drag</b> move obstacle · <b>Double-click</b> remove ·
+          <b>Scroll</b> resize
         </div>
-        <div id="status"></div>
+        <div id="status" class="overlay"></div>
       </div>
 
       <div class="bar">
@@ -701,13 +722,13 @@
           const stride = Math.max(1, Math.floor(K / maxDraw))
           let wMax = 0
           for (let k = 0; k < K; k++) if (Wt[k] > wMax) wMax = Wt[k]
-          ctx.lineWidth = 1
+          ctx.lineWidth = 1.25
           for (let k = 0; k < K; k += stride) {
             const tb = k * (T + 1) * 2
             const rel = wMax > 0 ? Wt[k] / wMax : 0
             ctx.strokeStyle = CRASH[k]
-              ? withAlpha(COLORS.danger, 0.12)
-              : withAlpha(COLORS.tertiary, 0.08 + 0.6 * Math.sqrt(rel))
+              ? withAlpha(COLORS.danger, 0.3)
+              : withAlpha(COLORS.secondary, 0.2 + 0.7 * Math.sqrt(rel))
             ctx.beginPath()
             ctx.moveTo(X(TRAJ[tb]), Y(TRAJ[tb + 1]))
             for (let t = 1; t <= T; t++) ctx.lineTo(X(TRAJ[tb + 2 * t]), Y(TRAJ[tb + 2 * t + 1]))
@@ -729,12 +750,17 @@
 
         // optimal plan
         if (opt.plan && PLAN && PLAN.length === (P.T + 1) * 2) {
-          ctx.strokeStyle = COLORS.secondary
-          ctx.lineWidth = 3
           ctx.lineJoin = "round"
+          ctx.lineCap = "round"
           ctx.beginPath()
           ctx.moveTo(X(PLAN[0]), Y(PLAN[1]))
           for (let t = 1; t <= P.T; t++) ctx.lineTo(X(PLAN[2 * t]), Y(PLAN[2 * t + 1]))
+          // halo so the plan stays visible on top of the (now stronger) samples
+          ctx.strokeStyle = COLORS.light
+          ctx.lineWidth = 7
+          ctx.stroke()
+          ctx.strokeStyle = COLORS.secondary
+          ctx.lineWidth = 3.5
           ctx.stroke()
         }
 
@@ -786,7 +812,7 @@
             ? `  reached ${goalsReached}` + (goalsSkipped ? ` skipped ${goalsSkipped}` : "")
             : "") +
           "\n" +
-          `ESS ${stats.ess.toFixed(1)} / ${P.K}  crashed ${(stats.crashedFrac * 100).toFixed(0)}%\n` +
+          `ESS/K ${(stats.ess / P.K).toFixed(3)}  crashed ${(stats.crashedFrac * 100).toFixed(0)}%\n` +
           `solve ${stats.ms.toFixed(1)} ms`
       }
 
