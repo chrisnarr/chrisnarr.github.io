@@ -106,7 +106,8 @@
         #hint {
           font-size: 12px;
         }
-        #status {
+        #status,
+        #legend {
           font-size: 11px;
         }
       }
@@ -145,18 +146,19 @@
         color: var(--light);
         opacity: 0.9;
       }
-      .legend {
+      #legend {
+        left: 8px;
+        top: 8px;
         display: flex;
-        flex-wrap: wrap;
-        gap: 4px 16px;
-        margin: 10px 0 4px;
+        flex-direction: column;
+        gap: 2px;
         font-size: 13px;
-        color: var(--darkgray);
+        line-height: 1.4;
       }
-      .legend span {
+      #legend span {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 7px;
       }
       .sw {
         display: inline-block;
@@ -174,10 +176,8 @@
       .sw-plan {
         border-top-width: 3.5px;
       }
-      .sw-limit {
-        border-top: 1.5px dashed var(--gray);
-      }
       .plots {
+        margin-top: 10px;
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
         gap: 8px 12px;
@@ -243,14 +243,13 @@
           <b>Scroll</b> resize
         </div>
         <div id="status" class="overlay"></div>
+        <div id="legend" class="overlay">
+          <span><i class="sw sw-samples"></i>Samples (opacity = weight)</span>
+          <span><i class="sw sw-crash"></i>Crashed samples</span>
+          <span><i class="sw sw-plan"></i>Optimal plan</span>
+        </div>
       </div>
 
-      <div class="legend" aria-hidden="true">
-        <span><i class="sw sw-samples"></i>Sampled inputs (opacity = weight)</span>
-        <span><i class="sw sw-crash"></i>Crashed samples</span>
-        <span><i class="sw sw-plan"></i>Optimal sequence</span>
-        <span><i class="sw sw-limit"></i>Input limits</span>
-      </div>
       <div class="plots">
         <figure class="plot">
           <figcaption>Linear velocity <i>v</i> [m/s] over the horizon</figcaption>
