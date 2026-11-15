@@ -176,7 +176,7 @@
         <button id="addObs">Add obstacle</button>
         <button id="shuffle">Random obstacles</button>
         <button id="defaults">Default parameters</button>
-        <button id="auto" class="toggle" aria-pressed="false">Auto mode: off</button>
+        <button id="auto" class="toggle" aria-pressed="true">Auto mode: on</button>
       </div>
 
       <div class="grid">
@@ -220,6 +220,7 @@
       // ---------------------------------------------------------------------
       const WORLD = { w: 12, h: 8 } // meters
       const ROBOT_R = 0.22 // robot radius [m]
+      const GOAL_R = 0.25 // radius of the goal ring; reaching it counts as reaching the target [m]
       const DT = 0.05 // control period [s]
       const V_MIN = -0.6,
         V_MAX = 1.6 // linear velocity bounds [m/s]
@@ -485,24 +486,17 @@
       // ---------------------------------------------------------------------
       // Auto mode: new target + new obstacles whenever the target is reached
       // ---------------------------------------------------------------------
-      const GOAL_TOL = 0.2 // [m]
-      const GOAL_HOLD = 0.5 // time the robot has to stay at the target [s]
       const GOAL_TIMEOUT = 25 // give up on a target after this long (stuck in a local minimum) [s]
-      let autoMode = false
+      let autoMode = true
       let goalsReached = 0
       let goalsSkipped = 0
-      let holdTime = 0
       let legTime = 0
 
       function checkAutoGoal() {
-        if (!autoMode || drag.obj) {
-          holdTime = 0
-          return
-        }
+        if (!autoMode || drag.obj) return
         legTime += DT
-        const d = Math.hypot(robot.x - goal.x, robot.y - goal.y)
-        holdTime = d < GOAL_TOL ? holdTime + DT : 0
-        if (holdTime >= GOAL_HOLD) {
+        // replace the target as soon as the robot enters the goal ring
+        if (Math.hypot(robot.x - goal.x, robot.y - goal.y) < GOAL_R) {
           goalsReached++
           newScene()
         } else if (legTime >= GOAL_TIMEOUT) {
@@ -554,7 +548,6 @@
         goal.y = g.y
         randomizeObstacles(true)
         trail = []
-        holdTime = 0
         legTime = 0
       }
 
@@ -751,7 +744,7 @@
         ctx.strokeStyle = COLORS.secondary
         ctx.lineWidth = 2
         ctx.beginPath()
-        ctx.arc(gx, gy, 0.25 * scale, 0, 2 * Math.PI)
+        ctx.arc(gx, gy, GOAL_R * scale, 0, 2 * Math.PI)
         ctx.stroke()
         ctx.beginPath()
         ctx.arc(gx, gy, 0.08 * scale, 0, 2 * Math.PI)
@@ -985,7 +978,6 @@
       })
       document.getElementById("auto").addEventListener("click", (e) => {
         autoMode = !autoMode
-        holdTime = 0
         legTime = 0
         e.target.setAttribute("aria-pressed", String(autoMode))
         e.target.textContent = `Auto mode: ${autoMode ? "on" : "off"}`

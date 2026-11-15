@@ -2,15 +2,12 @@
 title: Model Predictive Path Integral (MPPI) Control
 date: 2026-11-15 00:00:00
 draft: false
-tags:
-  - control
-  - demo
 ---
 
 <iframe src="/static/demos/mppi.html" title="MPPI simulator" style="width: 100%; height: 760px; border: none;" loading="lazy"></iframe>
 
 **Click** anywhere to set the target, **drag** the obstacles around, **double-click** an obstacle to remove it, and **scroll** over an obstacle to resize it.
-With **Auto mode** on, a new target (roughly ahead of the robot) and new obstacles are generated every time the robot reaches the target.
+**Auto mode** (on by default) generates a new target, roughly ahead of the robot, and new obstacles every time the robot reaches the target; turn it off to place targets yourself.
 The thin lines are the sampled rollouts (darker means a higher weight, red means the sample crashed), and the thick line is the resulting optimal plan.
 
 ## What you're looking at
