@@ -19,7 +19,7 @@ $$
 \dot p_x = v \cos\theta, \qquad \dot p_y = v \sin\theta, \qquad \dot\theta = \omega .
 $$
 
-with state $x = [p_x, p_y, \theta]^\top$ with position $p = (p_x, p_y)$ and heading angle $\theta$, and input $u = [v, \omega]^\top$ with linear velocity $v$ and angular velocity $\omega$.
+where $x = [p_x, p_y, \theta]^\top$ is the state, consisting of the position $p = (p_x, p_y)$ and the heading angle $\theta$, and $u = [v, \omega]^\top$ is the input, consisting of the linear velocity $v$ and the angular velocity $\omega$.
 
 MPPI is a sampling-based model predictive controller.
 It keeps a nominal control sequence $U = (u_0, \dots, u_{T-1})$ over a horizon of $T$ steps, and at every control step it
@@ -37,7 +37,7 @@ It keeps a nominal control sequence $U = (u_0, \dots, u_{T-1})$ over a horizon o
 5. Applies $u_0$ to the robot and shifts $U$ by one step to warm-start the next iteration.
 
 No gradients of the dynamics or the cost are needed, only forward evaluations.
-Here it is the distance to the target, small penalties for driving backwards and for not facing the target, a soft penalty in a safety band around each obstacle. Also, a large constant cost is added for any rollout that collides with an obstacle or leaves the arena.
+Here, the stage cost $\ell$ consists of the distance to the target, small penalties for input effort, for driving backwards and for not facing the target, and a soft penalty in a safety band around each obstacle. A rollout that collides with an obstacle or leaves the arena is stopped there and pays a large penalty for every remaining step of the horizon, so earlier crashes cost more. The terminal cost $V_f$ is the remaining distance to the target.
 
 ## Parameters
 

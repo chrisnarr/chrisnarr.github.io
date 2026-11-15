@@ -1368,7 +1368,10 @@
       function fitFrame() {
         try {
           const fe = window.frameElement
-          if (fe) fe.style.height = document.documentElement.scrollHeight + "px"
+          // measure the content itself: documentElement.scrollHeight is never smaller than
+          // the iframe's current height, so the frame could grow but never shrink
+          const h = Math.ceil(document.getElementById("wrap").getBoundingClientRect().height)
+          if (fe) fe.style.height = h + "px"
         } catch (e) {}
       }
 
@@ -1403,7 +1406,7 @@
         draw()
       }).observe(document.querySelector(".plots"))
       resizePlots()
-      new ResizeObserver(fitFrame).observe(document.body)
+      new ResizeObserver(fitFrame).observe(document.getElementById("wrap"))
       resize()
       requestAnimationFrame(frame)
     </script>
