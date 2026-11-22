@@ -1,7 +1,7 @@
 ---
 title: TD vs. Monte Carlo on a Plinko Board
 date: 2026-11-22 00:00:00
-draft: false
+draft: true
 ---
 
 <iframe src="/static/demos/plinko.html" title="Plinko TD vs. MC" style="width: 100%; height: 1150px; border: none;" loading="lazy"></iframe>

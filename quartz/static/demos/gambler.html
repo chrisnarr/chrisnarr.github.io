@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gambler's Problem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&family=IBM+Plex+Mono&display=swap"
+    />
+    <style>
+      :root {
+        --light: #ffffff;
+        --lightgray: #e5e5e5;
+        --gray: #b8b8b8;
+        --darkgray: #4e4e4e;
+        --dark: #2b2b2b;
+        --secondary: #0065bd;
+        --tertiary: #64a0c8;
+        --vi: #8e5cc4;
+        --flash: #f0a020;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --light: #161618;
+          --lightgray: #393639;
+          --gray: #646464;
+          --darkgray: #d4d4d4;
+          --dark: #ebebec;
+          --secondary: #64a0c8;
+          --tertiary: #0065bd;
+          --vi: #b48ee0;
+          --flash: #f5b942;
+        }
+      }
+      :root[data-theme="dark"] {
+        --light: #161618;
+        --lightgray: #393639;
+        --gray: #646464;
+        --darkgray: #d4d4d4;
+        --dark: #ebebec;
+        --secondary: #64a0c8;
+        --tertiary: #0065bd;
+        --vi: #b48ee0;
+        --flash: #f5b942;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--light);
+        color: var(--darkgray);
+        font-family: "Source Sans Pro", system-ui, sans-serif;
+        font-size: 15px;
+      }
+      #wrap {
+        padding: 2px;
+      }
+      .panels {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+        gap: 10px 12px;
+      }
+      .panel {
+        margin: 0;
+        min-width: 0;
+      }
+      .panel figcaption {
+        display: flex;
+        align-items: baseline;
+        gap: 7px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 4px;
+      }
+      .panel figcaption .name {
+        white-space: nowrap;
+      }
+      .panel figcaption .sub {
+        font-weight: 400;
+        font-size: 13px;
+        color: var(--darkgray);
+      }
+      .stage {
+        border: 1px solid var(--lightgray);
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 4px 4px 2px;
+      }
+      .stage + .stage {
+        margin-top: 6px;
+      }
+      .cap {
+        font-size: 12.5px;
+        color: var(--darkgray);
+        margin: 0 0 0 4px;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+        cursor: crosshair;
+      }
+      .status {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 4px;
+        color: var(--darkgray);
+        min-height: 3em;
+      }
+      .status b {
+        font-weight: 400;
+        color: var(--dark);
+      }
+      .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex: none;
+        align-self: center;
+      }
+      .dot.vi {
+        background: var(--vi);
+      }
+      .dot.pi {
+        background: var(--secondary);
+      }
+      #readout {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px;
+        color: var(--darkgray);
+        margin: 6px 0 0;
+        min-height: 3em;
+        line-height: 1.5;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin: 10px 0 6px;
+      }
+      button {
+        font: inherit;
+        font-size: 14px;
+        padding: 4px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--lightgray);
+        background: var(--light);
+        color: var(--dark);
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--secondary);
+        color: var(--secondary);
+      }
+      button.primary {
+        background: var(--secondary);
+        border-color: var(--secondary);
+        color: var(--light);
+      }
+      button.primary:hover {
+        color: var(--light);
+        opacity: 0.9;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 4px 20px;
+      }
+      label.slider {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        font-size: 14px;
+        gap: 0 8px;
+      }
+      label.slider span.val {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px;
+        color: var(--dark);
+      }
+      label.slider input {
+        grid-column: 1 / 3;
+        width: 100%;
+        accent-color: var(--secondary);
+        margin: 2px 0 6px;
+      }
+      .toggles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 16px;
+        font-size: 14px;
+        margin-top: 2px;
+      }
+      .toggles input {
+        accent-color: var(--secondary);
+      }
+      @media (max-width: 520px) {
+        .status,
+        #readout {
+          font-size: 11px;
+        }
+        button {
+          font-size: 13px;
+          padding: 4px 9px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrap">
+      <div class="panels">
+        <figure class="panel">
+          <figcaption>
+            <i class="dot vi"></i><span class="name">Value iteration</span>
+            <span class="sub">in-place sweeps over the capital</span>
+          </figcaption>
+          <div class="stage">
+            <p class="cap">Probability of winning V(s), one line per sweep</p>
+            <canvas id="vVI" role="img" aria-label="Value estimates of value iteration"></canvas>
+          </div>
+          <div class="stage">
+            <p class="cap">Greedy stake</p>
+            <canvas id="pVI" role="img" aria-label="Greedy stakes of value iteration"></canvas>
+          </div>
+          <div class="status" id="stVI"></div>
+        </figure>
+        <figure class="panel">
+          <figcaption>
+            <i class="dot pi"></i><span class="name">Policy iteration</span>
+            <span class="sub">exact evaluation, then improvement</span>
+          </figcaption>
+          <div class="stage">
+            <p class="cap">Probability of winning V<sup>π</sup>(s), one line per policy</p>
+            <canvas id="vPI" role="img" aria-label="Value of the policies of policy iteration"></canvas>
+          </div>
+          <div class="stage">
+            <p class="cap">Stake of the current policy π</p>
+            <canvas id="pPI" role="img" aria-label="Stakes of the current policy"></canvas>
+          </div>
+          <div class="status" id="stPI"></div>
+        </figure>
+      </div>
+      <div id="readout"></div>
+
+      <div class="bar">
+        <button id="play" class="primary">Pause</button>
+        <button id="step">Step</button>
+        <button id="reset">Restart</button>
+        <button id="defaults">Default parameters</button>
+      </div>
+      <div class="grid">
+        <label class="slider"
+          ><span>Probability of heads p<sub>h</sub></span> <span class="val" id="vP"></span>
+          <input id="sP" type="range" min="0.05" max="0.95" step="0.01"
+        /></label>
+        <label class="slider"
+          >Goal (capital to win) <span class="val" id="vG"></span>
+          <input id="sG" type="range" min="10" max="100" step="1"
+        /></label>
+        <label class="slider"
+          >Speed <span class="val" id="vV"></span>
+          <input id="sV" type="range" min="-0.3" max="1.5" step="0.01"
+        /></label>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="cAll" checked /> Show all optimal stakes</label>
+        <label><input type="checkbox" id="cStar" checked /> Show V*</label>
+        <label><input type="checkbox" id="cHist" checked /> Show history</label>
+      </div>
+    </div>
+
+    <script>
+      "use strict"
+
+      // ---------------------------------------------------------------------
+      // Gambler's problem: capital s in 1..G-1, stake a in 1..min(s, G-s),
+      // win the stake with probability ph, reward 1 for reaching G, gamma = 1
+      // ---------------------------------------------------------------------
+      const DEFAULTS = { ph: 0.4, goal: 100, speed: 0.6 }
+      const P = { ...DEFAULTS }
+      const opt = { all: true, star: true, hist: true }
+      const THETA = 1e-10
+      const TIE = 1e-9 // stakes whose value is within TIE of the best count as optimal
+
+      let G = P.goal
+      const maxStake = (s) => Math.min(s, G - s)
+      function q(V, s, a) {
+        return P.ph * V[s + a] + (1 - P.ph) * V[s - a]
+      }
+      function newV() {
+        const V = new Float64Array(G + 1)
+        V[G] = 1
+        return V
+      }
+      // all stakes within TIE of the best, and the smallest of them
+      function stakes(V, s) {
+        let m = -Infinity
+        const qs = []
+        for (let a = 1; a <= maxStake(s); a++) {
+          qs[a] = q(V, s, a)
+          m = Math.max(m, qs[a])
+        }
+        const set = []
+        for (let a = 1; a <= maxStake(s); a++) if (qs[a] >= m - TIE) set.push(a)
+        return { best: set[0], set, max: m }
+      }
+
+      // reference solution
+      let Vstar, optSets
+      function computeReference() {
+        Vstar = newV()
+        for (let it = 0; it < 100000; it++) {
+          let d = 0
+          for (let s = 1; s < G; s++) {
+            const v = stakes(Vstar, s).max
+            d = Math.max(d, Math.abs(v - Vstar[s]))
+            Vstar[s] = v
+          }
+          if (d < 1e-15) break
+        }
+        optSets = []
+        for (let s = 1; s < G; s++) optSets[s] = stakes(Vstar, s).set
+      }
+
+      // ---------------------------------------------------------------------
+      // Value iteration (in place, as in Sutton & Barto, Example 4.3)
+      // ---------------------------------------------------------------------
+      const VI = {
+        reset() {
+          this.V = newV()
+          this.hist = [this.V.slice()]
+          this.sweeps = 0
+          this.lastD = null
+          this.done = false
+          this.changed = new Float32Array(G + 1)
+        },
+        tick() {
+          if (this.done) return
+          let d = 0
+          for (let s = 1; s < G; s++) {
+            const v = stakes(this.V, s).max
+            this.changed[s] = Math.abs(v - this.V[s])
+            d = Math.max(d, this.changed[s])
+            this.V[s] = v
+          }
+          this.sweeps++
+          this.lastD = d
+          this.hist.push(this.V.slice())
+          if (this.hist.length > 80) this.hist.splice(1, 1)
+          if (d < THETA) this.done = true
+        },
+        stake(s) {
+          return stakes(this.V, s).best
+        },
+      }
+
+      // ---------------------------------------------------------------------
+      // Policy iteration with exact evaluation (a linear system per policy)
+      // ---------------------------------------------------------------------
+      function evaluate(pi) {
+        // unknowns V[1..G-1]:  V(s) - ph V(s+a) - (1-ph) V(s-a) = ph [s+a = G]
+        const n = G - 1
+        const A = []
+        const b = new Float64Array(n)
+        for (let i = 0; i < n; i++) A.push(new Float64Array(n))
+        for (let s = 1; s < G; s++) {
+          const i = s - 1,
+            a = pi[s]
+          A[i][i] += 1
+          if (s + a === G) b[i] += P.ph
+          else A[i][s + a - 1] -= P.ph
+          if (s - a > 0) A[i][s - a - 1] -= 1 - P.ph
+        }
+        // Gaussian elimination with partial pivoting
+        for (let c = 0; c < n; c++) {
+          let piv = c
+          for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[piv][c])) piv = r
+          ;[A[c], A[piv]] = [A[piv], A[c]]
+          ;[b[c], b[piv]] = [b[piv], b[c]]
+          for (let r = c + 1; r < n; r++) {
+            const f = A[r][c] / A[c][c]
+            if (!f) continue
+            for (let k = c; k < n; k++) A[r][k] -= f * A[c][k]
+            b[r] -= f * b[c]
+          }
+        }
+        const V = newV()
+        for (let r = n - 1; r >= 0; r--) {
+          let sum = b[r]
+          for (let k = r + 1; k < n; k++) sum -= A[r][k] * V[k + 1]
+          V[r + 1] = sum / A[r][r]
+        }
+        return V
+      }
+
+      const PI = {
+        reset() {
+          this.pi = new Int32Array(G + 1).fill(1) // start timid: always bet 1
+          this.V = newV()
+          this.hist = []
+          this.policyNo = 0
+          this.phase = "eval"
+          this.lastChanged = null
+          this.done = false
+          this.changed = new Float32Array(G + 1)
+        },
+        tick() {
+          if (this.done) return
+          if (this.phase === "eval") {
+            this.V = evaluate(this.pi)
+            this.hist.push(this.V.slice())
+            this.phase = "improve"
+            this.changed.fill(0)
+          } else {
+            let n = 0
+            for (let s = 1; s < G; s++) {
+              const cur = q(this.V, s, this.pi[s])
+              const st = stakes(this.V, s)
+              if (st.max > cur + TIE) {
+                this.pi[s] = st.best
+                this.changed[s] = 1
+                n++
+              }
+            }
+            this.lastChanged = n
+            if (n === 0) this.done = true
+            else {
+              this.policyNo++
+              this.phase = "eval"
+            }
+          }
+        },
+        stake(s) {
+          return this.pi[s]
+        },
+      }
+
+      function resetAll() {
+        G = P.goal
+        computeReference()
+        VI.reset()
+        PI.reset()
+      }
+
+      // ---------------------------------------------------------------------
+      // Theme
+      // ---------------------------------------------------------------------
+      const COLORS = {}
+      function readColors() {
+        let src = document.documentElement
+        try {
+          if (window.parent !== window && window.parent.document) {
+            const pr = window.parent.document.documentElement
+            const theme = pr.getAttribute("saved-theme")
+            if (theme) document.documentElement.setAttribute("data-theme", theme)
+            const pcs = getComputedStyle(pr)
+            if (pcs.getPropertyValue("--secondary").trim()) src = pr
+          }
+        } catch (e) {}
+        const cs = getComputedStyle(src)
+        const own = getComputedStyle(document.documentElement)
+        for (const n of ["light", "lightgray", "gray", "darkgray", "dark", "secondary", "tertiary"]) {
+          const v = cs.getPropertyValue("--" + n).trim() || own.getPropertyValue("--" + n).trim()
+          COLORS[n] = v
+          document.documentElement.style.setProperty("--" + n, v)
+        }
+        for (const n of ["vi", "flash"]) COLORS[n] = own.getPropertyValue("--" + n).trim()
+        draw()
+      }
+      function watchTheme() {
+        try {
+          if (window.parent !== window)
+            new MutationObserver(readColors).observe(window.parent.document.documentElement, {
+              attributes: true,
+              attributeFilter: ["saved-theme", "class", "style"],
+            })
+        } catch (e) {}
+        if (window.matchMedia)
+          window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", readColors)
+      }
+      const probeCtx = document.createElement("canvas").getContext("2d")
+      function withAlpha(color, a) {
+        probeCtx.fillStyle = "#000"
+        probeCtx.fillStyle = color
+        const c = probeCtx.fillStyle
+        if (c[0] === "#") {
+          const r = parseInt(c.slice(1, 3), 16),
+            g = parseInt(c.slice(3, 5), 16),
+            b = parseInt(c.slice(5, 7), 16)
+          return `rgba(${r},${g},${b},${a})`
+        }
+        const m = c.match(/[\d.]+/g)
+        return m ? `rgba(${m[0]},${m[1]},${m[2]},${a})` : color
+      }
+
+      // ---------------------------------------------------------------------
+      // Rendering
+      // ---------------------------------------------------------------------
+      const views = [
+        { A: VI, kind: "v", cv: document.getElementById("vVI"), h: 150 },
+        { A: VI, kind: "p", cv: document.getElementById("pVI"), h: 130 },
+        { A: PI, kind: "v", cv: document.getElementById("vPI"), h: 150 },
+        { A: PI, kind: "p", cv: document.getElementById("pPI"), h: 130 },
+      ]
+      for (const v of views) v.ctx = v.cv.getContext("2d")
+      let hover = -1
+      const M = { L: 34, R: 14, T: 6, B: 18 }
+
+      function resize() {
+        const dpr = window.devicePixelRatio || 1
+        for (const v of views) {
+          const w = v.cv.parentElement.clientWidth - 8
+          v.cv.width = Math.round(w * dpr)
+          v.cv.height = Math.round(v.h * dpr)
+          v.cv.style.height = v.h + "px"
+          v.ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+          v.w = w
+        }
+        draw()
+        fitFrame()
+      }
+
+      function axes(ctx, w, h, yMax, yTicks, yFmt) {
+        const X = (s) => M.L + (s / G) * (w - M.L - M.R)
+        const Y = (y) => M.T + (1 - y / yMax) * (h - M.T - M.B)
+        ctx.font = '10.5px "IBM Plex Mono", ui-monospace, monospace'
+        ctx.fillStyle = COLORS.gray
+        ctx.strokeStyle = COLORS.lightgray
+        ctx.lineWidth = 1
+        ctx.textAlign = "right"
+        ctx.textBaseline = "middle"
+        for (const t of yTicks) {
+          const y = Math.round(Y(t)) + 0.5
+          ctx.beginPath()
+          ctx.moveTo(M.L, y)
+          ctx.lineTo(w - M.R, y)
+          ctx.stroke()
+          ctx.fillText(yFmt(t), M.L - 5, y)
+        }
+        ctx.textAlign = "center"
+        ctx.textBaseline = "top"
+        const xs = G >= 50 ? 25 : G >= 20 ? 10 : 5
+        for (let s = 0; s <= G; s += xs) ctx.fillText(String(s), X(s), h - M.B + 4)
+        ctx.textAlign = "right"
+        ctx.textBaseline = "bottom"
+        ctx.fillText("capital", w - M.R, h - M.B - 1)
+        return { X, Y }
+      }
+
+      function drawValue(v) {
+        const { ctx, w, h, A } = v
+        if (!w) return
+        ctx.clearRect(0, 0, w, h)
+        const { X, Y } = axes(ctx, w, h, 1, [0, 0.25, 0.5, 0.75, 1], (t) => String(t))
+        const line = (V, color, width, dash) => {
+          ctx.strokeStyle = color
+          ctx.lineWidth = width
+          ctx.setLineDash(dash || [])
+          ctx.beginPath()
+          for (let s = 0; s <= G; s++) s ? ctx.lineTo(X(s), Y(V[s])) : ctx.moveTo(X(s), Y(V[s]))
+          ctx.stroke()
+          ctx.setLineDash([])
+        }
+        const col = A === VI ? COLORS.vi : COLORS.secondary
+        if (opt.hist) {
+          const H = A.hist
+          const n = H.length
+          for (let i = 0; i < n - 1; i++) {
+            const age = (n - 1 - i) / Math.max(1, Math.min(n - 1, 25))
+            line(H[i], withAlpha(col, Math.max(0.08, 0.5 * (1 - age))), 1)
+          }
+        }
+        if (opt.star) line(Vstar, COLORS.darkgray, 1.3, [5, 4])
+        line(A.V, col, 2)
+        if (hover > 0 && hover < G) {
+          ctx.strokeStyle = withAlpha(COLORS.dark, 0.4)
+          ctx.lineWidth = 1
+          ctx.beginPath()
+          ctx.moveTo(X(hover), M.T)
+          ctx.lineTo(X(hover), h - M.B)
+          ctx.stroke()
+        }
+      }
+
+      function drawPolicy(v) {
+        const { ctx, w, h, A } = v
+        if (!w) return
+        ctx.clearRect(0, 0, w, h)
+        const top = Math.ceil(G / 2 / 5) * 5
+        const ticks = []
+        const ts = top > 25 ? 10 : 5
+        for (let t = 0; t <= top; t += ts) ticks.push(t)
+        const { X, Y } = axes(ctx, w, h, top, ticks, (t) => String(t))
+        const bw = Math.max(1, ((w - M.L - M.R) / G) * 0.75)
+        const col = A === VI ? COLORS.vi : COLORS.secondary
+        const showGreedy = A === PI || VI.sweeps > 0
+        for (let s = 1; s < G; s++) {
+          if (opt.all)
+            for (const a of optSets[s]) {
+              ctx.fillStyle = withAlpha(COLORS.darkgray, 0.45)
+              ctx.fillRect(X(s) - 1.2, Y(a) - 1.2, 2.4, 2.4)
+            }
+          if (!showGreedy) continue
+          const a = A.stake(s)
+          const wrong = !optSets[s].includes(a)
+          ctx.fillStyle = withAlpha(col, wrong ? 0.45 : 0.9)
+          if (A === PI && PI.changed[s] && PI.phase === "eval") ctx.fillStyle = COLORS.flash
+          ctx.fillRect(X(s) - bw / 2, Y(a), bw, Y(0) - Y(a))
+        }
+        if (hover > 0 && hover < G) {
+          ctx.strokeStyle = withAlpha(COLORS.dark, 0.4)
+          ctx.lineWidth = 1
+          ctx.beginPath()
+          ctx.moveTo(X(hover), M.T)
+          ctx.lineTo(X(hover), h - M.B)
+          ctx.stroke()
+        }
+      }
+
+      const fmt = (v, d = 4) => (v === null || v === undefined ? "–" : v.toFixed(d))
+      const sub = (n) =>
+        String(n)
+          .split("")
+          .map((d) => "₀₁₂₃₄₅₆₇₈₉"[+d])
+          .join("")
+      function countWrong(A) {
+        let n = 0
+        for (let s = 1; s < G; s++) if (!optSets[s].includes(A.stake(s))) n++
+        return n
+      }
+
+      function updateStatus() {
+        const vw = countWrong(VI)
+        document.getElementById("stVI").innerHTML = VI.done
+          ? `converged after ${VI.sweeps} sweeps (max |ΔV| < 1e−10)<br><b>greedy stakes: ${vw} not optimal</b>`
+          : `sweep ${VI.sweeps} · max |ΔV| = ${VI.lastD === null ? "–" : VI.lastD.toExponential(1)}<br><b>greedy stakes: ${vw} not optimal</b>`
+        let t
+        const pw = countWrong(PI)
+        if (PI.done) t = `π${sub(PI.policyNo)} is stable after ${PI.policyNo} improvements<br><b>${pw} stakes not optimal (ties allowed)</b>`
+        else if (PI.phase === "improve")
+          t = `evaluated π${sub(PI.policyNo)} exactly · P(win from ${Math.floor(G / 2)}) = ${fmt(PI.V[Math.floor(G / 2)], 3)}<br><b>next: greedy improvement</b>`
+        else if (PI.lastChanged === null) t = `initial policy π₀: always bet 1<br><b>next: evaluate it</b>`
+        else t = `improved: ${PI.lastChanged} stakes changed → π${sub(PI.policyNo)}<br><b>next: evaluate π${sub(PI.policyNo)}</b>`
+        document.getElementById("stPI").innerHTML = t
+      }
+
+      const readout = document.getElementById("readout")
+      function updateReadout() {
+        if (hover <= 0 || hover >= G) {
+          readout.innerHTML = "Hover over a plot to inspect a capital.<br>&nbsp;"
+          return
+        }
+        const s = hover
+        readout.innerHTML =
+          `capital ${s} · V* ${fmt(Vstar[s])} · optimal stakes {${optSets[s].join(", ")}}<br>` +
+          `VI: V ${fmt(VI.V[s])}, stake ${VI.sweeps ? VI.stake(s) : "–"} · PI: V<sup>π</sup> ${fmt(PI.V[s])}, stake ${PI.stake(s)}`
+      }
+
+      function draw() {
+        if (!COLORS.light || !Vstar) return
+        for (const v of views) (v.kind === "v" ? drawValue : drawPolicy)(v)
+        updateStatus()
+      }
+
+      for (const v of views) {
+        v.cv.addEventListener("pointermove", (ev) => {
+          const r = v.cv.getBoundingClientRect()
+          const s = Math.round(((ev.clientX - r.left - M.L) / (r.width - M.L - M.R)) * G)
+          hover = s
+          updateReadout()
+          draw()
+        })
+        v.cv.addEventListener("pointerleave", () => {
+          hover = -1
+          updateReadout()
+          draw()
+        })
+      }
+
+      // ---------------------------------------------------------------------
+      // Controls
+      // ---------------------------------------------------------------------
+      let running = true
+      const sliders = [
+        ["sP", "vP", "ph", (v) => v.toFixed(2)],
+        ["sG", "vG", "goal", (v) => String(v)],
+        ["sV", "vV", "speed", (v) => {
+          const r = Math.pow(10, v)
+          return (r < 10 ? r.toFixed(1) : Math.round(r)) + " steps/s"
+        }],
+      ]
+      function syncSliders() {
+        for (const [sid, vid, key, f] of sliders) {
+          document.getElementById(sid).value = P[key]
+          document.getElementById(vid).textContent = f(P[key])
+        }
+      }
+      for (const [sid, vid, key, f] of sliders)
+        document.getElementById(sid).addEventListener("input", (e) => {
+          P[key] = parseFloat(e.target.value)
+          document.getElementById(vid).textContent = f(P[key])
+          if (key !== "speed") {
+            resetAll()
+            draw()
+          }
+        })
+      function setRunning(r) {
+        running = r
+        document.getElementById("play").textContent = r ? "Pause" : "Play"
+      }
+      function tick() {
+        VI.tick()
+        PI.tick()
+      }
+      document.getElementById("play").addEventListener("click", () => setRunning(!running))
+      document.getElementById("step").addEventListener("click", () => {
+        setRunning(false)
+        tick()
+        draw()
+        updateReadout()
+      })
+      document.getElementById("reset").addEventListener("click", () => {
+        resetAll()
+        draw()
+      })
+      document.getElementById("defaults").addEventListener("click", () => {
+        Object.assign(P, DEFAULTS)
+        syncSliders()
+        resetAll()
+        draw()
+      })
+      for (const [id, key] of [
+        ["cAll", "all"],
+        ["cStar", "star"],
+        ["cHist", "hist"],
+      ])
+        document.getElementById(id).addEventListener("change", (e) => {
+          opt[key] = e.target.checked
+          draw()
+        })
+
+      function fitFrame() {
+        try {
+          const fe = window.frameElement
+          const h = Math.ceil(document.getElementById("wrap").getBoundingClientRect().height)
+          if (fe) fe.style.height = h + 4 + "px"
+        } catch (e) {}
+      }
+
+      let last = performance.now(),
+        acc = 0
+      function frame(now) {
+        const dt = Math.min(0.1, (now - last) / 1000)
+        last = now
+        if (running) {
+          acc += dt * Math.pow(10, P.speed)
+          let n = Math.min(Math.floor(acc), 10)
+          acc -= Math.floor(acc)
+          for (let i = 0; i < n; i++) tick()
+          if (n) {
+            draw()
+            updateReadout()
+          }
+        }
+        requestAnimationFrame(frame)
+      }
+
+      resetAll()
+      syncSliders()
+      updateReadout()
+      readColors()
+      watchTheme()
+      new ResizeObserver(resize).observe(document.querySelector(".panels"))
+      new ResizeObserver(fitFrame).observe(document.getElementById("wrap"))
+      resize()
+      requestAnimationFrame(frame)
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mountain Car DP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&family=IBM+Plex+Mono&display=swap"
+    />
+    <style>
+      :root {
+        --light: #ffffff;
+        --lightgray: #e5e5e5;
+        --gray: #b8b8b8;
+        --darkgray: #4e4e4e;
+        --dark: #2b2b2b;
+        --secondary: #0065bd;
+        --tertiary: #64a0c8;
+        --danger: #d1495b;
+        --vi: #8e5cc4;
+        --goal: #2e9e5b;
+        --flash: #f0a020;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --light: #161618;
+          --lightgray: #393639;
+          --gray: #646464;
+          --darkgray: #d4d4d4;
+          --dark: #ebebec;
+          --secondary: #64a0c8;
+          --tertiary: #0065bd;
+          --danger: #e07a87;
+          --vi: #b48ee0;
+          --goal: #5cc28a;
+          --flash: #f5b942;
+        }
+      }
+      :root[data-theme="dark"] {
+        --light: #161618;
+        --lightgray: #393639;
+        --gray: #646464;
+        --darkgray: #d4d4d4;
+        --dark: #ebebec;
+        --secondary: #64a0c8;
+        --tertiary: #0065bd;
+        --danger: #e07a87;
+        --vi: #b48ee0;
+        --goal: #5cc28a;
+        --flash: #f5b942;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--light);
+        color: var(--darkgray);
+        font-family: "Source Sans Pro", system-ui, sans-serif;
+        font-size: 15px;
+      }
+      #wrap {
+        padding: 2px;
+      }
+      .panels {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+        gap: 10px 12px;
+      }
+      .panel {
+        margin: 0;
+        min-width: 0;
+      }
+      .panel figcaption {
+        display: flex;
+        align-items: baseline;
+        gap: 7px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 4px;
+      }
+      .panel figcaption .name {
+        white-space: nowrap;
+      }
+      .panel figcaption .sub {
+        font-weight: 400;
+        font-size: 13px;
+        color: var(--darkgray);
+      }
+      .stage {
+        border: 1px solid var(--lightgray);
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 4px;
+      }
+      .stage + .stage {
+        margin-top: 6px;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+      }
+      .hm {
+        cursor: crosshair;
+      }
+      .status {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 4px;
+        color: var(--darkgray);
+        min-height: 3em;
+      }
+      .status b {
+        font-weight: 400;
+        color: var(--dark);
+      }
+      .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex: none;
+        align-self: center;
+      }
+      .dot.vi {
+        background: var(--vi);
+      }
+      .dot.pi {
+        background: var(--secondary);
+      }
+      .sw {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        vertical-align: -1px;
+        margin-right: 3px;
+      }
+      #readout {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px;
+        color: var(--darkgray);
+        margin: 6px 0 0;
+        min-height: 3em;
+        line-height: 1.5;
+      }
+      .legend {
+        font-size: 13px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px 14px;
+        margin-top: 4px;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin: 10px 0 6px;
+      }
+      .bar .lbl {
+        font-size: 14px;
+        margin-right: 2px;
+      }
+      button {
+        font: inherit;
+        font-size: 14px;
+        padding: 4px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--lightgray);
+        background: var(--light);
+        color: var(--dark);
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--secondary);
+        color: var(--secondary);
+      }
+      button.primary {
+        background: var(--secondary);
+        border-color: var(--secondary);
+        color: var(--light);
+      }
+      button[aria-pressed="true"] {
+        background: var(--tertiary);
+        border-color: var(--tertiary);
+        color: var(--light);
+      }
+      button.primary:hover,
+      button[aria-pressed="true"]:hover {
+        color: var(--light);
+        opacity: 0.9;
+      }
+      .plots {
+        margin-top: 4px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 8px 12px;
+      }
+      .plot {
+        min-width: 0;
+        margin: 0;
+        border: 1px solid var(--lightgray);
+        border-radius: 8px;
+        padding: 6px 8px 4px;
+      }
+      .plot figcaption {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 2px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 10px;
+      }
+      .plot figcaption .key {
+        font-weight: 400;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .plot canvas {
+        height: 150px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 4px 20px;
+      }
+      label.slider {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        font-size: 14px;
+        gap: 0 8px;
+      }
+      label.slider span.val {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px;
+        color: var(--dark);
+      }
+      label.slider input {
+        grid-column: 1 / 3;
+        width: 100%;
+        accent-color: var(--secondary);
+        margin: 2px 0 6px;
+      }
+      .toggles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 16px;
+        font-size: 14px;
+        margin-top: 2px;
+      }
+      .toggles input {
+        accent-color: var(--secondary);
+      }
+      @media (max-width: 520px) {
+        .status,
+        #readout {
+          font-size: 11px;
+        }
+        button {
+          font-size: 13px;
+          padding: 4px 9px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrap">
+      <div class="panels">
+        <figure class="panel">
+          <figcaption>
+            <i class="dot vi"></i><span class="name">Value iteration</span>
+            <span class="sub">Bellman optimality sweeps</span>
+          </figcaption>
+          <div class="stage">
+            <canvas class="hm" id="hmVI" role="img" aria-label="Value iteration over position and velocity"></canvas>
+          </div>
+          <div class="stage">
+            <canvas id="carVI" role="img" aria-label="Car driven by the greedy policy of value iteration"></canvas>
+          </div>
+          <div class="status" id="stVI"></div>
+        </figure>
+        <figure class="panel">
+          <figcaption>
+            <i class="dot pi"></i><span class="name">Policy iteration</span>
+            <span class="sub">evaluate the policy, then improve it</span>
+          </figcaption>
+          <div class="stage">
+            <canvas class="hm" id="hmPI" role="img" aria-label="Policy iteration over position and velocity"></canvas>
+          </div>
+          <div class="stage">
+            <canvas id="carPI" role="img" aria-label="Car driven by the current policy of policy iteration"></canvas>
+          </div>
+          <div class="status" id="stPI"></div>
+        </figure>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div id="readout"></div>
+
+      <div class="plots">
+        <figure class="plot">
+          <figcaption>
+            max |V − V*| (log scale)
+            <span class="key"><i class="dot vi"></i>VI</span>
+            <span class="key"><i class="dot pi"></i>PI</span>
+          </figcaption>
+          <canvas id="pErr" role="img" aria-label="Value error over sweeps"></canvas>
+        </figure>
+        <figure class="plot">
+          <figcaption>
+            Decisions to the goal from the start
+            <span class="key"><i class="dot vi"></i>VI</span>
+            <span class="key"><i class="dot pi"></i>PI</span>
+          </figcaption>
+          <canvas id="pSteps" role="img" aria-label="Decisions needed to reach the goal over sweeps"></canvas>
+        </figure>
+      </div>
+
+      <div class="bar">
+        <button id="play" class="primary">Pause</button>
+        <button id="step">Step</button>
+        <button id="reset">Restart from V = 0</button>
+        <button id="defaults">Default parameters</button>
+        <span class="lbl" style="margin-left: 8px">Show:</span>
+        <button id="vValue" aria-pressed="true">Value</button>
+        <button id="vPolicy" aria-pressed="false">Policy</button>
+      </div>
+      <div class="grid">
+        <label class="slider"
+          >Grid resolution <span class="val" id="vN"></span>
+          <input id="sN" type="range" min="11" max="101" step="10"
+        /></label>
+        <label class="slider"
+          >Discount γ <span class="val" id="vG"></span>
+          <input id="sG" type="range" min="0.9" max="0.999" step="0.001"
+        /></label>
+        <label class="slider"
+          >Engine force <span class="val" id="vF"></span>
+          <input id="sF" type="range" min="0.0005" max="0.0025" step="0.0001"
+        /></label>
+        <label class="slider"
+          >PI evaluation sweeps per improvement <span class="val" id="vK"></span>
+          <input id="sK" type="range" min="0" max="6" step="1"
+        /></label>
+        <label class="slider"
+          >Speed <span class="val" id="vV"></span>
+          <input id="sV" type="range" min="0" max="2" step="0.01"
+        /></label>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="cTraj" checked /> Show trajectory from the start state</label>
+      </div>
+    </div>
+
+    <script>
+      "use strict"
+
+      // ---------------------------------------------------------------------
+      // Mountain car (Moore 1990; Sutton & Barto, Example 10.1)
+      //   v' = v + F a - 0.0025 cos(3 x),  x' = x + v',  a in {-1, 0, +1}
+      // A decision is held for REPEAT simulation steps and costs -1; reaching x >= 0.5 ends it.
+      // The continuous state space is covered by an NX x NV grid; the value of a successor
+      // state is interpolated bilinearly between the four surrounding grid points.
+      // ---------------------------------------------------------------------
+      const XMIN = -1.2,
+        XMAX = 0.5,
+        VMAX = 0.07,
+        REPEAT = 4,
+        THETA = 1e-3,
+        MAX_DECISIONS = 300
+      const K_STEPS = [1, 2, 3, 5, 10, 20, Infinity]
+      const ACT = [-1, 0, 1]
+      const DEFAULTS = { n: 41, gamma: 0.99, force: 0.001, kIdx: 6, speed: 1.1 }
+      const P = { ...DEFAULTS }
+      const opt = { view: "value", traj: true }
+      let start = { x: -0.5, v: 0 }
+
+      let NX, NV, NG
+      let tIdx, tW, tTerm // transitions per (grid point, action): 4 neighbours and weights
+      const gx = (i) => XMIN + (i / (NX - 1)) * (XMAX - XMIN)
+      const gv = (j) => -VMAX + (j / (NV - 1)) * 2 * VMAX
+
+      function simulate(x, v, a) {
+        for (let k = 0; k < REPEAT; k++) {
+          v += P.force * a - 0.0025 * Math.cos(3 * x)
+          v = Math.max(-VMAX, Math.min(VMAX, v))
+          x += v
+          if (x < XMIN) {
+            x = XMIN
+            v = 0
+          }
+          if (x >= XMAX) return { x, v, done: true }
+        }
+        return { x, v, done: false }
+      }
+      function interp(x, v, out, o) {
+        const fx = Math.min(NX - 1 - 1e-9, Math.max(0, ((x - XMIN) / (XMAX - XMIN)) * (NX - 1)))
+        const fv = Math.min(NV - 1 - 1e-9, Math.max(0, ((v + VMAX) / (2 * VMAX)) * (NV - 1)))
+        const i = Math.floor(fx),
+          j = Math.floor(fv)
+        const wx = fx - i,
+          wv = fv - j
+        out.idx[o] = j * NX + i
+        out.idx[o + 1] = j * NX + i + 1
+        out.idx[o + 2] = (j + 1) * NX + i
+        out.idx[o + 3] = (j + 1) * NX + i + 1
+        out.w[o] = (1 - wx) * (1 - wv)
+        out.w[o + 1] = wx * (1 - wv)
+        out.w[o + 2] = (1 - wx) * wv
+        out.w[o + 3] = wx * wv
+      }
+      function buildModel() {
+        NX = NV = P.n
+        NG = NX * NV
+        tIdx = new Int32Array(NG * 3 * 4)
+        tW = new Float64Array(NG * 3 * 4)
+        tTerm = new Uint8Array(NG * 3)
+        const out = { idx: tIdx, w: tW }
+        for (let j = 0; j < NV; j++)
+          for (let i = 0; i < NX; i++) {
+            const s = j * NX + i
+            for (let a = 0; a < 3; a++) {
+              const r = simulate(gx(i), gv(j), ACT[a])
+              if (r.done || i === NX - 1) tTerm[s * 3 + a] = 1
+              else interp(r.x, r.v, out, (s * 3 + a) * 4)
+            }
+          }
+      }
+      function qValue(V, s, a) {
+        const k = s * 3 + a
+        if (tTerm[k]) return -1
+        const o = k * 4
+        return (
+          -1 +
+          P.gamma *
+            (tW[o] * V[tIdx[o]] + tW[o + 1] * V[tIdx[o + 1]] + tW[o + 2] * V[tIdx[o + 2]] + tW[o + 3] * V[tIdx[o + 3]])
+        )
+      }
+      function greedy(V, s) {
+        let best = -Infinity,
+          ba = 1
+        for (const a of [1, 2, 0]) {
+          const q = qValue(V, s, a)
+          if (q > best + 1e-12) {
+            best = q
+            ba = a
+          }
+        }
+        return { a: ba, q: best }
+      }
+
+      let Vstar
+      function computeReference() {
+        Vstar = new Float64Array(NG)
+        for (let it = 0; it < 20000; it++) {
+          let d = 0
+          for (let s = 0; s < NG; s++) {
+            const v = greedy(Vstar, s).q
+            d = Math.max(d, Math.abs(v - Vstar[s]))
+            Vstar[s] = v
+          }
+          if (d < 1e-7) break
+        }
+      }
+
+      // nearest grid point of a continuous state
+      const cellOf = (x, v) =>
+        Math.round(((v + VMAX) / (2 * VMAX)) * (NV - 1)) * NX +
+        Math.round(((x - XMIN) / (XMAX - XMIN)) * (NX - 1))
+      function rollout(pi, x, v) {
+        const pts = [[x, v]]
+        for (let d = 1; d <= MAX_DECISIONS; d++) {
+          const r = simulate(x, v, ACT[pi[cellOf(x, v)]])
+          x = r.x
+          v = r.v
+          pts.push([x, v])
+          if (r.done) return { pts, decisions: d, reached: true }
+        }
+        return { pts, decisions: MAX_DECISIONS, reached: false }
+      }
+
+      function makeSeries() {
+        return { pts: [], stride: 1, n: 0 }
+      }
+      function pushSeries(sr, p) {
+        if (sr.n++ % sr.stride !== 0) return
+        sr.pts.push(p)
+        if (sr.pts.length > 3000) {
+          sr.pts = sr.pts.filter((_, i) => i % 2 === 0)
+          sr.stride *= 2
+        }
+      }
+      function maxErr(V) {
+        let e = 0
+        for (let s = 0; s < NG; s++) e = Math.max(e, Math.abs(V[s] - Vstar[s]))
+        return e
+      }
+
+      // ---------------------------------------------------------------------
+      // Value iteration and policy iteration
+      // ---------------------------------------------------------------------
+      const VI = {
+        reset() {
+          this.V = new Float64Array(NG)
+          this.pi = new Int8Array(NG).fill(1)
+          this.delta = new Float64Array(NG)
+          this.sweeps = 0
+          this.lastD = null
+          this.done = false
+          this.err = makeSeries()
+          this.steps = makeSeries()
+          this.record()
+        },
+        tick() {
+          if (this.done) return
+          const Vn = new Float64Array(NG)
+          let d = 0
+          for (let s = 0; s < NG; s++) {
+            const g = greedy(this.V, s)
+            Vn[s] = g.q
+            this.pi[s] = g.a
+            this.delta[s] = g.q - this.V[s]
+            d = Math.max(d, Math.abs(this.delta[s]))
+          }
+          this.V = Vn
+          this.sweeps++
+          this.lastD = d
+          if (d < THETA) this.done = true
+          this.record()
+        },
+        record() {
+          pushSeries(this.err, { x: this.sweeps, y: maxErr(this.V) })
+          pushSeries(this.steps, { x: this.sweeps, y: rollout(this.pi, -0.5, 0).decisions })
+        },
+      }
+
+      const PI = {
+        reset() {
+          this.V = new Float64Array(NG)
+          this.pi = new Int8Array(NG).fill(2) // π0: always push right
+          this.delta = new Float64Array(NG)
+          this.changed = new Float32Array(NG)
+          this.sweeps = 0
+          this.k = 0
+          this.policyNo = 0
+          this.phase = "eval"
+          this.lastD = null
+          this.lastChanged = null
+          this.done = false
+          this.improvements = []
+          this.err = makeSeries()
+          this.steps = makeSeries()
+          this.record()
+        },
+        tick() {
+          if (this.done) return
+          if (this.phase === "eval") {
+            const Vn = new Float64Array(NG)
+            let d = 0
+            for (let s = 0; s < NG; s++) {
+              Vn[s] = qValue(this.V, s, this.pi[s])
+              this.delta[s] = Vn[s] - this.V[s]
+              d = Math.max(d, Math.abs(this.delta[s]))
+            }
+            this.V = Vn
+            this.sweeps++
+            this.k++
+            this.lastD = d
+            if (d < THETA || this.k >= K_STEPS[P.kIdx]) this.phase = "improve"
+          } else {
+            let n = 0
+            this.delta.fill(0)
+            for (let s = 0; s < NG; s++) {
+              const cur = qValue(this.V, s, this.pi[s])
+              const g = greedy(this.V, s)
+              if (g.q > cur + 1e-9 && g.a !== this.pi[s]) {
+                this.pi[s] = g.a
+                this.changed[s] = 1
+                n++
+              }
+            }
+            this.lastChanged = n
+            this.improvements.push(this.sweeps)
+            this.k = 0
+            this.phase = "eval"
+            if (n === 0 && this.lastD < THETA) this.done = true
+            else if (n > 0) this.policyNo++
+          }
+          this.record()
+        },
+        record() {
+          pushSeries(this.err, { x: this.sweeps, y: maxErr(this.V) })
+          pushSeries(this.steps, { x: this.sweeps, y: rollout(this.pi, -0.5, 0).decisions })
+        },
+      }
+
+      function resetAll() {
+        buildModel()
+        computeReference()
+        VI.reset()
+        PI.reset()
+        for (const c of cars) c.restart()
+      }
+
+      // ---------------------------------------------------------------------
+      // Theme
+      // ---------------------------------------------------------------------
+      const COLORS = {}
+      function readColors() {
+        let src = document.documentElement
+        try {
+          if (window.parent !== window && window.parent.document) {
+            const pr = window.parent.document.documentElement
+            const theme = pr.getAttribute("saved-theme")
+            if (theme) document.documentElement.setAttribute("data-theme", theme)
+            const pcs = getComputedStyle(pr)
+            if (pcs.getPropertyValue("--secondary").trim()) src = pr
+          }
+        } catch (e) {}
+        const cs = getComputedStyle(src)
+        const own = getComputedStyle(document.documentElement)
+        for (const n of ["light", "lightgray", "gray", "darkgray", "dark", "secondary", "tertiary"]) {
+          const v = cs.getPropertyValue("--" + n).trim() || own.getPropertyValue("--" + n).trim()
+          COLORS[n] = v
+          document.documentElement.style.setProperty("--" + n, v)
+        }
+        for (const n of ["danger", "vi", "goal", "flash"]) COLORS[n] = own.getPropertyValue("--" + n).trim()
+        RGB = {}
+        for (const n of ["light", "secondary", "danger", "gray"]) RGB[n] = rgbOf(COLORS[n])
+        buildLegend()
+        draw()
+      }
+      function watchTheme() {
+        try {
+          if (window.parent !== window)
+            new MutationObserver(readColors).observe(window.parent.document.documentElement, {
+              attributes: true,
+              attributeFilter: ["saved-theme", "class", "style"],
+            })
+        } catch (e) {}
+        if (window.matchMedia)
+          window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", readColors)
+      }
+      const probeCtx = document.createElement("canvas").getContext("2d")
+      function rgbOf(color) {
+        probeCtx.fillStyle = "#000"
+        probeCtx.fillStyle = color
+        const c = probeCtx.fillStyle
+        if (c[0] === "#") return [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16))
+        return (c.match(/[\d.]+/g) || [0, 0, 0]).slice(0, 3).map(Number)
+      }
+      function withAlpha(color, a) {
+        const [r, g, b] = rgbOf(color)
+        return `rgba(${r},${g},${b},${a})`
+      }
+      let RGB = {}
+      const mix = (c0, c1, t) => [0, 1, 2].map((k) => Math.round(c0[k] + (c1[k] - c0[k]) * t))
+
+      function buildLegend() {
+        const el = document.getElementById("legend")
+        if (opt.view === "policy")
+          el.innerHTML =
+            `<span><i class="sw" style="background:${withAlpha(COLORS.danger, 0.75)}"></i>push left</span>` +
+            `<span><i class="sw" style="background:${withAlpha(COLORS.gray, 0.45)}"></i>coast</span>` +
+            `<span><i class="sw" style="background:${withAlpha(COLORS.secondary, 0.75)}"></i>push right</span>` +
+            `<span>· click the map to set the start state</span>`
+        else
+          el.innerHTML =
+            `<span>darker = fewer decisions to the goal · click the map to set the start state</span>`
+      }
+
+      // ---------------------------------------------------------------------
+      // Rendering: phase-space maps and the car on the hill
+      // ---------------------------------------------------------------------
+      const panels = [
+        { A: VI, hm: document.getElementById("hmVI"), car: document.getElementById("carVI"), st: document.getElementById("stVI") },
+        { A: PI, hm: document.getElementById("hmPI"), car: document.getElementById("carPI"), st: document.getElementById("stPI") },
+      ]
+      for (const p of panels) {
+        p.hctx = p.hm.getContext("2d")
+        p.cctx = p.car.getContext("2d")
+        p.off = document.createElement("canvas")
+      }
+      const HM = { L: 34, R: 6, T: 6, B: 30 }
+      const CAR_H = 110
+      let hover = null
+
+      function resize() {
+        const dpr = window.devicePixelRatio || 1
+        for (const p of panels) {
+          const w = p.hm.parentElement.clientWidth - 8
+          const h = HM.T + (w - HM.L - HM.R) * 0.72 + HM.B
+          p.hm.width = Math.round(w * dpr)
+          p.hm.height = Math.round(h * dpr)
+          p.hm.style.height = h + "px"
+          p.hctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+          p.car.width = Math.round(w * dpr)
+          p.car.height = Math.round(CAR_H * dpr)
+          p.car.style.height = CAR_H + "px"
+          p.cctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+          Object.assign(p, { w, h, pw: w - HM.L - HM.R, ph: h - HM.T - HM.B })
+        }
+        draw()
+        fitFrame()
+      }
+      const toX = (p, x) => HM.L + ((x - XMIN) / (XMAX - XMIN)) * p.pw
+      const toY = (p, v) => HM.T + (1 - (v + VMAX) / (2 * VMAX)) * p.ph
+
+      function drawMap(p) {
+        const { hctx: ctx, w, h, A } = p
+        if (!w) return
+        ctx.clearRect(0, 0, w, h)
+        // render the grid into an NX x NV image and scale it up
+        const off = p.off
+        if (off.width !== NX || off.height !== NV) {
+          off.width = NX
+          off.height = NV
+        }
+        const octx = off.getContext("2d")
+        const img = octx.createImageData(NX, NV)
+        let vlo = 0
+        for (let s = 0; s < NG; s++) vlo = Math.min(vlo, Vstar[s])
+        for (let j = 0; j < NV; j++)
+          for (let i = 0; i < NX; i++) {
+            const s = j * NX + i
+            let c
+            if (opt.view === "policy") {
+              const a = A.pi[s]
+              c = a === 1 ? mix(RGB.light, RGB.gray, 0.45) : mix(RGB.light, a === 0 ? RGB.danger : RGB.secondary, 0.75)
+            } else {
+              const t = Math.min(1, Math.max(0, (A.V[s] - vlo) / -vlo))
+              c = mix(RGB.light, RGB.secondary, 0.06 + 0.88 * t)
+            }
+            const o = ((NV - 1 - j) * NX + i) * 4
+            img.data[o] = c[0]
+            img.data[o + 1] = c[1]
+            img.data[o + 2] = c[2]
+            img.data[o + 3] = 255
+          }
+        octx.putImageData(img, 0, 0)
+        ctx.imageSmoothingEnabled = false
+        const cw = p.pw / (NX - 1),
+          ch = p.ph / (NV - 1)
+        ctx.save()
+        ctx.beginPath()
+        ctx.rect(HM.L, HM.T, p.pw, p.ph)
+        ctx.clip()
+        ctx.drawImage(off, HM.L - cw / 2, HM.T - ch / 2, p.pw + cw, p.ph + ch)
+        if (A === PI && opt.view === "policy")
+          for (let s = 0; s < NG; s++)
+            if (PI.changed[s] > 0.05) {
+              const i = s % NX,
+                j = (s / NX) | 0
+              ctx.fillStyle = withAlpha(COLORS.flash, 0.7 * PI.changed[s])
+              ctx.fillRect(HM.L + i * cw - cw / 2, HM.T + (NV - 1 - j) * ch - ch / 2, cw, ch)
+            }
+        // trajectory from the start state
+        if (opt.traj) {
+          const r = rollout(A.pi, start.x, start.v)
+          ctx.strokeStyle = COLORS.dark
+          ctx.lineWidth = 1.8
+          ctx.lineJoin = "round"
+          ctx.beginPath()
+          r.pts.forEach(([x, v], k) => (k ? ctx.lineTo(toX(p, x), toY(p, v)) : ctx.moveTo(toX(p, x), toY(p, v))))
+          ctx.stroke()
+        }
+        ctx.restore()
+        // start marker
+        ctx.fillStyle = COLORS.light
+        ctx.strokeStyle = COLORS.dark
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.arc(toX(p, start.x), toY(p, start.v), 5, 0, 2 * Math.PI)
+        ctx.fill()
+        ctx.stroke()
+        // goal edge
+        ctx.fillStyle = COLORS.goal
+        ctx.fillRect(HM.L + p.pw - 2, HM.T, 3, p.ph)
+        // axes
+        ctx.strokeStyle = COLORS.lightgray
+        ctx.lineWidth = 1
+        ctx.strokeRect(HM.L + 0.5, HM.T + 0.5, p.pw, p.ph)
+        ctx.font = '10.5px "IBM Plex Mono", ui-monospace, monospace'
+        ctx.fillStyle = COLORS.gray
+        ctx.textAlign = "center"
+        ctx.textBaseline = "top"
+        for (const x of [-1.2, -0.8, -0.4, 0, 0.4]) ctx.fillText(String(x).replace("-", "−"), toX(p, x), HM.T + p.ph + 3)
+        ctx.fillText("position x →", HM.L + p.pw / 2, HM.T + p.ph + 15)
+        ctx.textAlign = "right"
+        ctx.textBaseline = "middle"
+        for (const v of [-0.07, 0, 0.07]) ctx.fillText(String(v).replace("-", "−").replace("0.", "."), HM.L - 4, toY(p, v))
+        ctx.save()
+        ctx.translate(9, HM.T + p.ph / 2)
+        ctx.rotate(-Math.PI / 2)
+        ctx.textAlign = "center"
+        ctx.fillText("velocity v →", 0, 0)
+        ctx.restore()
+        if (hover && hover.p === p) {
+          ctx.strokeStyle = COLORS.dark
+          ctx.lineWidth = 1
+          ctx.setLineDash([3, 3])
+          ctx.beginPath()
+          ctx.moveTo(toX(p, hover.x), HM.T)
+          ctx.lineTo(toX(p, hover.x), HM.T + p.ph)
+          ctx.moveTo(HM.L, toY(p, hover.v))
+          ctx.lineTo(HM.L + p.pw, toY(p, hover.v))
+          ctx.stroke()
+          ctx.setLineDash([])
+        }
+      }
+
+      // the car: replays the current policy from the start state
+      class Car {
+        constructor(A) {
+          this.A = A
+          this.restart()
+        }
+        restart() {
+          this.x = start.x
+          this.v = start.v
+          this.a = 0
+          this.k = 0
+          this.d = 0
+          this.wait = 0
+          this.done = false
+        }
+        advance(dt) {
+          if (!NG) return
+          if (this.done) {
+            this.wait -= dt
+            if (this.wait <= 0) this.restart()
+            return
+          }
+          this.acc = (this.acc || 0) + dt * 60 // simulation steps per second
+          while (this.acc >= 1 && !this.done) {
+            this.acc -= 1
+            if (this.k === 0) this.a = ACT[this.A.pi[cellOf(this.x, this.v)]]
+            this.v += P.force * this.a - 0.0025 * Math.cos(3 * this.x)
+            this.v = Math.max(-VMAX, Math.min(VMAX, this.v))
+            this.x += this.v
+            if (this.x < XMIN) {
+              this.x = XMIN
+              this.v = 0
+            }
+            this.k = (this.k + 1) % REPEAT
+            if (this.k === 0) this.d++
+            if (this.x >= XMAX || this.d >= MAX_DECISIONS) {
+              this.done = true
+              this.reached = this.x >= XMAX
+              this.wait = 1
+            }
+          }
+        }
+      }
+      const cars = [new Car(VI), new Car(PI)]
+
+      function drawCar(p, car) {
+        const { cctx: ctx, w } = p
+        if (!w) return
+        const h = CAR_H
+        ctx.clearRect(0, 0, w, h)
+        const X = (x) => 10 + ((x - XMIN) / (XMAX + 0.05 - XMIN)) * (w - 20)
+        const Y = (x) => h - 14 - ((Math.sin(3 * x) + 1) / 2) * (h - 34)
+        ctx.fillStyle = withAlpha(COLORS.gray, 0.25)
+        ctx.strokeStyle = COLORS.darkgray
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        ctx.moveTo(X(XMIN), h)
+        for (let x = XMIN; x <= XMAX + 0.05; x += 0.01) ctx.lineTo(X(x), Y(x))
+        ctx.lineTo(X(XMAX + 0.05), h)
+        ctx.closePath()
+        ctx.fill()
+        ctx.beginPath()
+        for (let x = XMIN; x <= XMAX + 0.05; x += 0.01) x === XMIN ? ctx.moveTo(X(x), Y(x)) : ctx.lineTo(X(x), Y(x))
+        ctx.stroke()
+        // flag
+        const fx = X(XMAX),
+          fy = Y(XMAX)
+        ctx.strokeStyle = COLORS.dark
+        ctx.beginPath()
+        ctx.moveTo(fx, fy)
+        ctx.lineTo(fx, fy - 22)
+        ctx.stroke()
+        ctx.fillStyle = COLORS.goal
+        ctx.beginPath()
+        ctx.moveTo(fx, fy - 22)
+        ctx.lineTo(fx + 12, fy - 18)
+        ctx.lineTo(fx, fy - 14)
+        ctx.fill()
+        // car body, tilted with the slope, and an arrow for the engine
+        const x = Math.min(car.x, XMAX + 0.04)
+        const slope = Math.atan2(Y(x + 0.01) - Y(x - 0.01), X(x + 0.01) - X(x - 0.01))
+        ctx.save()
+        ctx.translate(X(x), Y(x))
+        ctx.rotate(slope)
+        ctx.fillStyle = p.A === VI ? COLORS.vi : COLORS.secondary
+        ctx.fillRect(-11, -11, 22, 9)
+        ctx.fillStyle = COLORS.dark
+        for (const wx of [-6, 6]) {
+          ctx.beginPath()
+          ctx.arc(wx, -2, 3, 0, 2 * Math.PI)
+          ctx.fill()
+        }
+        if (car.a && !car.done) {
+          ctx.strokeStyle = car.a < 0 ? COLORS.danger : COLORS.secondary
+          ctx.lineWidth = 2
+          const d = car.a
+          ctx.beginPath()
+          ctx.moveTo(-d * 14, -7)
+          ctx.lineTo(-d * 24, -7)
+          ctx.stroke()
+          ctx.beginPath()
+          ctx.moveTo(d * 14, -7)
+          ctx.lineTo(d * 22, -7)
+          ctx.lineTo(d * 18, -11)
+          ctx.moveTo(d * 22, -7)
+          ctx.lineTo(d * 18, -3)
+          ctx.stroke()
+        }
+        ctx.restore()
+        ctx.font = '11px "IBM Plex Mono", ui-monospace, monospace'
+        ctx.fillStyle = COLORS.darkgray
+        ctx.textAlign = "left"
+        ctx.textBaseline = "top"
+        ctx.fillText(
+          car.done ? (car.reached ? `reached the goal in ${car.d} decisions` : `gave up after ${MAX_DECISIONS} decisions`) : `decision ${car.d}`,
+          8,
+          6,
+        )
+      }
+
+      const sub = (n) =>
+        String(n)
+          .split("")
+          .map((d) => "₀₁₂₃₄₅₆₇₈₉"[+d])
+          .join("")
+      function stepsText(A) {
+        const r = rollout(A.pi, -0.5, 0)
+        return r.reached ? `${r.decisions} decisions from (−0.5, 0)` : `doesn't reach the goal from (−0.5, 0)`
+      }
+      function updateStatus() {
+        panels[0].st.innerHTML = VI.done
+          ? `converged after ${VI.sweeps} sweeps (max |ΔV| < ${THETA})<br><b>greedy policy: ${stepsText(VI)}</b>`
+          : `sweep ${VI.sweeps} · max |ΔV| = ${VI.lastD === null ? "–" : VI.lastD.toFixed(3)}<br><b>greedy policy: ${stepsText(VI)}</b>`
+        let t
+        if (PI.done) t = `π${sub(PI.policyNo)} is stable · ${PI.sweeps} sweeps`
+        else if (PI.phase === "improve") t = `sweep ${PI.sweeps} · evaluation of π${sub(PI.policyNo)} done, next: improvement`
+        else if (PI.k === 0 && PI.lastChanged !== null) t = `improved: ${PI.lastChanged} actions changed → π${sub(PI.policyNo)}`
+        else
+          t = `sweep ${PI.sweeps} · evaluating π${sub(PI.policyNo)}${PI.policyNo === 0 ? " (always push right)" : ""} · max |ΔV| = ${PI.lastD === null ? "–" : PI.lastD.toFixed(3)}`
+        panels[1].st.innerHTML = t + `<br><b>π${sub(PI.policyNo)}: ${stepsText(PI)}</b>`
+      }
+
+      const readout = document.getElementById("readout")
+      const NAMES = ["left", "coast", "right"]
+      function updateReadout() {
+        if (!hover) {
+          readout.innerHTML = `Hover over a map to inspect a state; the grid has ${NX} × ${NV} points.<br>&nbsp;`
+          return
+        }
+        const s = cellOf(hover.x, hover.v)
+        readout.innerHTML =
+          `x ${hover.x.toFixed(2)}, v ${hover.v.toFixed(3)} · V* ${Vstar[s].toFixed(1)} (≈ ${Math.round(-Math.log(1 + (1 - P.gamma) * Vstar[s]) / -Math.log(P.gamma))} decisions to go)<br>` +
+          `VI: V ${VI.V[s].toFixed(1)}, ${NAMES[VI.pi[s]]} · PI: V<sup>π</sup> ${PI.V[s].toFixed(1)}, ${NAMES[PI.pi[s]]}`
+      }
+
+      // ---------------------------------------------------------------------
+      // Plots
+      // ---------------------------------------------------------------------
+      const plots = {
+        err: { cv: document.getElementById("pErr") },
+        steps: { cv: document.getElementById("pSteps") },
+      }
+      for (const k in plots) plots[k].ctx = plots[k].cv.getContext("2d")
+      function resizePlots() {
+        const dpr = window.devicePixelRatio || 1
+        for (const k in plots) {
+          const p = plots[k]
+          const w = p.cv.clientWidth,
+            h = p.cv.clientHeight
+          p.cv.width = Math.round(w * dpr)
+          p.cv.height = Math.round(h * dpr)
+          p.ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+          p.w = w
+          p.h = h
+        }
+      }
+      function niceStep(span, n) {
+        const raw = span / n
+        const mag = Math.pow(10, Math.floor(Math.log10(raw)))
+        const f = raw / mag
+        return (f >= 5 ? 10 : f >= 2 ? 5 : f >= 1.5 ? 2 : 1) * mag
+      }
+      function drawPlot(p, series, { log, marks, yMax }) {
+        const { ctx, w, h } = p
+        if (!w) return
+        ctx.clearRect(0, 0, w, h)
+        const L = 40,
+          R = 8,
+          T = 6,
+          B = 20
+        const tf = (y) => (log ? Math.log10(Math.max(y, 1e-4)) : y)
+        let xMax = 10,
+          lo = log ? -3 : 0,
+          hi = log ? 1 : yMax || 1
+        for (const sr of series)
+          for (const q of sr.pts) {
+            xMax = Math.max(xMax, q.x)
+            lo = Math.min(lo, tf(q.y))
+            hi = Math.max(hi, tf(q.y))
+          }
+        if (log) {
+          lo = Math.floor(lo)
+          hi = Math.ceil(hi)
+        }
+        const X = (x) => L + (x / xMax) * (w - L - R)
+        const Y = (y) => T + (1 - (y - lo) / (hi - lo)) * (h - T - B)
+        ctx.font = '10.5px "IBM Plex Mono", ui-monospace, monospace'
+        ctx.fillStyle = COLORS.gray
+        ctx.strokeStyle = COLORS.lightgray
+        ctx.lineWidth = 1
+        ctx.textAlign = "right"
+        ctx.textBaseline = "middle"
+        const ys = log ? Math.max(1, Math.ceil((hi - lo) / 5)) : Math.max(1, niceStep(hi - lo, 4))
+        for (let v = Math.ceil(lo / ys) * ys; v <= hi + 1e-9; v += ys) {
+          const y = Math.round(Y(v)) + 0.5
+          ctx.beginPath()
+          ctx.moveTo(L, y)
+          ctx.lineTo(w - R, y)
+          ctx.stroke()
+          ctx.fillText(log ? (v === 0 ? "1" : "1e" + v).replace("-", "−") : v === MAX_DECISIONS && !log ? "never" : String(+v.toFixed(2)), L - 5, y)
+        }
+        ctx.textAlign = "center"
+        ctx.textBaseline = "top"
+        const xs = Math.max(1, niceStep(xMax, Math.max(2, Math.floor((w - L) / 60))))
+        for (let v = 0; v <= xMax + 1e-9; v += xs) ctx.fillText(String(v), X(v), h - B + 5)
+        ctx.textAlign = "right"
+        ctx.textBaseline = "bottom"
+        ctx.fillText("sweeps", w - R, h - B - 2)
+        ctx.save()
+        ctx.beginPath()
+        ctx.rect(L, T - 2, w - L - R, h - T - B + 4)
+        ctx.clip()
+        if (marks) {
+          ctx.strokeStyle = withAlpha(COLORS.secondary, 0.6)
+          ctx.lineWidth = 1.5
+          ctx.beginPath()
+          for (const m of marks) {
+            const x = Math.round(X(m)) + 0.5
+            ctx.moveTo(x, h - B)
+            ctx.lineTo(x, h - B - 7)
+          }
+          ctx.stroke()
+        }
+        for (const sr of series) {
+          if (!sr.pts.length) continue
+          ctx.strokeStyle = sr.color
+          ctx.lineWidth = 2
+          ctx.lineJoin = "round"
+          ctx.beginPath()
+          sr.pts.forEach((q, i) => (i ? ctx.lineTo(X(q.x), Y(tf(q.y))) : ctx.moveTo(X(q.x), Y(tf(q.y)))))
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+      function drawPlots() {
+        drawPlot(
+          plots.err,
+          [
+            { pts: VI.err.pts, color: COLORS.vi },
+            { pts: PI.err.pts, color: COLORS.secondary },
+          ],
+          { log: true, marks: PI.improvements },
+        )
+        drawPlot(
+          plots.steps,
+          [
+            { pts: VI.steps.pts, color: COLORS.vi },
+            { pts: PI.steps.pts, color: COLORS.secondary },
+          ],
+          { marks: PI.improvements, yMax: MAX_DECISIONS },
+        )
+      }
+
+      function draw() {
+        if (!COLORS.light || !Vstar) return
+        for (const p of panels) drawMap(p)
+        drawPlots()
+        updateStatus()
+      }
+      function drawCars() {
+        if (!COLORS.light) return
+        panels.forEach((p, i) => drawCar(p, cars[i]))
+      }
+
+      function stateAt(p, ev) {
+        const r = p.hm.getBoundingClientRect()
+        const x = XMIN + ((ev.clientX - r.left - HM.L) / p.pw) * (XMAX - XMIN)
+        const v = -VMAX + (1 - (ev.clientY - r.top - HM.T) / p.ph) * 2 * VMAX
+        if (x < XMIN || x > XMAX || v < -VMAX || v > VMAX) return null
+        return { x, v, p }
+      }
+      for (const p of panels) {
+        p.hm.addEventListener("pointermove", (ev) => {
+          hover = stateAt(p, ev)
+          updateReadout()
+          draw()
+        })
+        p.hm.addEventListener("pointerleave", () => {
+          hover = null
+          updateReadout()
+          draw()
+        })
+        p.hm.addEventListener("pointerdown", (ev) => {
+          const s = stateAt(p, ev)
+          if (!s) return
+          start = { x: Math.min(s.x, XMAX - 0.02), v: s.v }
+          for (const c of cars) c.restart()
+          draw()
+        })
+      }
+
+      // ---------------------------------------------------------------------
+      // Controls
+      // ---------------------------------------------------------------------
+      let running = true
+      const sliders = [
+        ["sN", "vN", "n", (v) => `${v} × ${v}`, "model"],
+        ["sG", "vG", "gamma", (v) => v.toFixed(3), "model"],
+        ["sF", "vF", "force", (v) => v.toFixed(4), "model"],
+        ["sK", "vK", "kIdx", (v) => (K_STEPS[v] === Infinity ? "until converged" : String(K_STEPS[v])), "k"],
+        ["sV", "vV", "speed", (v) => {
+          const r = Math.pow(10, v)
+          return (r < 10 ? r.toFixed(1) : Math.round(r)) + " sweeps/s"
+        }, ""],
+      ]
+      function syncSliders() {
+        for (const [sid, vid, key, f] of sliders) {
+          document.getElementById(sid).value = P[key]
+          document.getElementById(vid).textContent = f(P[key])
+        }
+      }
+      for (const [sid, vid, key, f, kind] of sliders) {
+        const el = document.getElementById(sid)
+        el.addEventListener("input", (e) => {
+          P[key] = parseFloat(e.target.value)
+          document.getElementById(vid).textContent = f(P[key])
+          if (kind === "k") PI.done = false
+        })
+        // rebuilding the model is heavier, so do it once the slider is released
+        el.addEventListener("change", () => {
+          if (kind === "model") {
+            resetAll()
+            updateReadout()
+            draw()
+          }
+        })
+      }
+      function setRunning(r) {
+        running = r
+        document.getElementById("play").textContent = r ? "Pause" : "Play"
+      }
+      function tick() {
+        VI.tick()
+        PI.tick()
+      }
+      document.getElementById("play").addEventListener("click", () => setRunning(!running))
+      document.getElementById("step").addEventListener("click", () => {
+        setRunning(false)
+        tick()
+        draw()
+        updateReadout()
+      })
+      document.getElementById("reset").addEventListener("click", () => {
+        VI.reset()
+        PI.reset()
+        for (const c of cars) c.restart()
+        draw()
+      })
+      document.getElementById("defaults").addEventListener("click", () => {
+        Object.assign(P, DEFAULTS)
+        syncSliders()
+        resetAll()
+        draw()
+      })
+      function setView(v) {
+        opt.view = v
+        document.getElementById("vValue").setAttribute("aria-pressed", v === "value")
+        document.getElementById("vPolicy").setAttribute("aria-pressed", v === "policy")
+        buildLegend()
+        draw()
+      }
+      document.getElementById("vValue").addEventListener("click", () => setView("value"))
+      document.getElementById("vPolicy").addEventListener("click", () => setView("policy"))
+      document.getElementById("cTraj").addEventListener("change", (e) => {
+        opt.traj = e.target.checked
+        draw()
+      })
+
+      function fitFrame() {
+        try {
+          const fe = window.frameElement
+          const h = Math.ceil(document.getElementById("wrap").getBoundingClientRect().height)
+          if (fe) fe.style.height = h + 4 + "px"
+        } catch (e) {}
+      }
+
+      let last = performance.now(),
+        acc = 0
+      function frame(now) {
+        const dt = Math.min(0.1, (now - last) / 1000)
+        last = now
+        let ticked = false
+        if (running) {
+          acc += dt * Math.pow(10, P.speed)
+          const n = Math.min(Math.floor(acc), 6)
+          acc -= Math.floor(acc)
+          for (let i = 0; i < n; i++) tick()
+          ticked = n > 0
+          if (ticked && hover) updateReadout()
+        }
+        for (const c of cars) c.advance(dt)
+        if (PI.changed) for (let s = 0; s < NG; s++) PI.changed[s] *= Math.exp(-dt / 1.2)
+        if (ticked || opt.view === "policy") draw()
+        drawCars()
+        requestAnimationFrame(frame)
+      }
+
+      resetAll()
+      syncSliders()
+      updateReadout()
+      readColors()
+      watchTheme()
+      new ResizeObserver(resize).observe(document.querySelector(".panels"))
+      new ResizeObserver(() => {
+        resizePlots()
+        draw()
+      }).observe(document.querySelector(".plots"))
+      resizePlots()
+      new ResizeObserver(fitFrame).observe(document.getElementById("wrap"))
+      resize()
+      requestAnimationFrame(frame)
+    </script>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 ---
 title: Value Iteration and Policy Iteration
 date: 2026-11-22 00:00:00
-draft: false
+draft: true
 ---
 
 <iframe src="/static/demos/vi-pi.html" title="Value and policy iteration" style="width: 100%; height: 1150px; border: none;" loading="lazy"></iframe>
