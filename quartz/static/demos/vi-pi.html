@@ -1,0 +1,1344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Value and Policy Iteration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&family=IBM+Plex+Mono&display=swap"
+    />
+    <style>
+      :root {
+        --light: #ffffff;
+        --lightgray: #e5e5e5;
+        --gray: #b8b8b8;
+        --darkgray: #4e4e4e;
+        --dark: #2b2b2b;
+        --secondary: #0065bd;
+        --tertiary: #64a0c8;
+        --danger: #d1495b;
+        --vi: #8e5cc4;
+        --goal: #2e9e5b;
+        --flash: #f0a020;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --light: #161618;
+          --lightgray: #393639;
+          --gray: #646464;
+          --darkgray: #d4d4d4;
+          --dark: #ebebec;
+          --secondary: #64a0c8;
+          --tertiary: #0065bd;
+          --danger: #e07a87;
+          --vi: #b48ee0;
+          --goal: #5cc28a;
+          --flash: #f5b942;
+        }
+      }
+      :root[data-theme="dark"] {
+        --light: #161618;
+        --lightgray: #393639;
+        --gray: #646464;
+        --darkgray: #d4d4d4;
+        --dark: #ebebec;
+        --secondary: #64a0c8;
+        --tertiary: #0065bd;
+        --danger: #e07a87;
+        --vi: #b48ee0;
+        --goal: #5cc28a;
+        --flash: #f5b942;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--light);
+        color: var(--darkgray);
+        font-family: "Source Sans Pro", system-ui, sans-serif;
+        font-size: 15px;
+      }
+      #wrap {
+        padding: 2px;
+      }
+      .panels {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+        gap: 10px 12px;
+      }
+      .panel {
+        margin: 0;
+        min-width: 0;
+      }
+      .panel figcaption {
+        display: flex;
+        align-items: baseline;
+        gap: 7px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 4px;
+      }
+      .panel figcaption .name {
+        white-space: nowrap;
+      }
+      .panel figcaption .sub {
+        font-weight: 400;
+        font-size: 13px;
+        color: var(--darkgray);
+      }
+      .stage {
+        position: relative;
+        border: 1px solid var(--lightgray);
+        border-radius: 8px;
+        overflow: hidden;
+        touch-action: none;
+      }
+      canvas {
+        display: block;
+        width: 100%;
+      }
+      .stage canvas {
+        cursor: crosshair;
+      }
+      .status {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 4px;
+        color: var(--darkgray);
+        min-height: 3em;
+      }
+      .status b {
+        font-weight: 400;
+        color: var(--dark);
+      }
+      .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex: none;
+        align-self: center;
+      }
+      .dot.vi {
+        background: var(--vi);
+      }
+      .dot.pi {
+        background: var(--secondary);
+      }
+      #readout {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px;
+        color: var(--darkgray);
+        margin: 6px 0 0;
+        min-height: 3em;
+        line-height: 1.5;
+      }
+      .bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin: 10px 0 6px;
+      }
+      .bar .lbl {
+        font-size: 14px;
+        margin-right: 2px;
+      }
+      button {
+        font: inherit;
+        font-size: 14px;
+        padding: 4px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--lightgray);
+        background: var(--light);
+        color: var(--dark);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      button:hover {
+        border-color: var(--secondary);
+        color: var(--secondary);
+      }
+      button.primary {
+        background: var(--secondary);
+        border-color: var(--secondary);
+        color: var(--light);
+      }
+      button[aria-pressed="true"] {
+        background: var(--tertiary);
+        border-color: var(--tertiary);
+        color: var(--light);
+      }
+      button.primary:hover,
+      button[aria-pressed="true"]:hover {
+        color: var(--light);
+        opacity: 0.9;
+      }
+      .sw {
+        display: inline-block;
+        width: 13px;
+        height: 13px;
+        border-radius: 3px;
+        border: 1px solid var(--gray);
+        flex: none;
+      }
+      .sw-wall {
+        background: var(--dark);
+        border-color: var(--dark);
+      }
+      .sw-lava {
+        background: color-mix(in srgb, var(--danger) 60%, transparent);
+        border-color: var(--danger);
+      }
+      .sw-ice {
+        background: repeating-linear-gradient(
+          135deg,
+          transparent 0 3px,
+          color-mix(in srgb, var(--darkgray) 55%, transparent) 3px 4px
+        );
+      }
+      .sw-goal {
+        background: color-mix(in srgb, var(--goal) 35%, transparent);
+        border-color: var(--goal);
+      }
+      .sw-erase {
+        background: var(--light);
+      }
+      .plots {
+        margin-top: 4px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 8px 12px;
+      }
+      .plot {
+        min-width: 0;
+        margin: 0;
+        border: 1px solid var(--lightgray);
+        border-radius: 8px;
+        padding: 6px 8px 4px;
+      }
+      .plot figcaption {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 2px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 10px;
+      }
+      .plot figcaption .key {
+        font-weight: 400;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .plot canvas {
+        height: 160px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 4px 20px;
+      }
+      label.slider {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        font-size: 14px;
+        gap: 0 8px;
+      }
+      label.slider span.val {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px;
+        color: var(--dark);
+      }
+      label.slider input {
+        grid-column: 1 / 3;
+        width: 100%;
+        accent-color: var(--secondary);
+        margin: 2px 0 6px;
+      }
+      .toggles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 16px;
+        font-size: 14px;
+        margin-top: 2px;
+      }
+      .toggles input {
+        accent-color: var(--secondary);
+      }
+      @media (max-width: 520px) {
+        .status,
+        #readout {
+          font-size: 11px;
+        }
+        button {
+          font-size: 13px;
+          padding: 4px 9px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrap">
+      <div class="panels">
+        <figure class="panel">
+          <figcaption>
+            <i class="dot vi"></i><span class="name">Value iteration</span>
+            <span class="sub">one Bellman optimality backup per sweep</span>
+          </figcaption>
+          <div class="stage">
+            <canvas id="cvVI" role="img" aria-label="Value iteration on the gridworld"></canvas>
+          </div>
+          <div class="status" id="stVI"></div>
+        </figure>
+        <figure class="panel">
+          <figcaption>
+            <i class="dot pi"></i><span class="name">Policy iteration</span>
+            <span class="sub">evaluate the policy, then improve it</span>
+          </figcaption>
+          <div class="stage">
+            <canvas id="cvPI" role="img" aria-label="Policy iteration on the gridworld"></canvas>
+          </div>
+          <div class="status" id="stPI"></div>
+        </figure>
+      </div>
+      <div id="readout"></div>
+
+      <div class="bar" id="tools">
+        <span class="lbl">Paint:</span>
+        <button data-tool="wall" aria-pressed="true"><i class="sw sw-wall"></i>Wall</button>
+        <button data-tool="lava" aria-pressed="false"><i class="sw sw-lava"></i>Lava</button>
+        <button data-tool="ice" aria-pressed="false"><i class="sw sw-ice"></i>Ice</button>
+        <button data-tool="goal" aria-pressed="false"><i class="sw sw-goal"></i>Goal</button>
+        <button data-tool="erase" aria-pressed="false"><i class="sw sw-erase"></i>Erase</button>
+      </div>
+
+      <div class="plots">
+        <figure class="plot">
+          <figcaption>
+            max |V − V*| (log scale)
+            <span class="key"><i class="dot vi"></i>VI</span>
+            <span class="key"><i class="dot pi"></i>PI</span>
+          </figcaption>
+          <canvas id="pErr" role="img" aria-label="Value error over sweeps"></canvas>
+        </figure>
+        <figure class="plot">
+          <figcaption>
+            Cells with a suboptimal action
+            <span class="key"><i class="dot vi"></i>VI</span>
+            <span class="key"><i class="dot pi"></i>PI</span>
+          </figcaption>
+          <canvas id="pPol" role="img" aria-label="Number of suboptimal actions over sweeps"></canvas>
+        </figure>
+      </div>
+
+      <div class="bar">
+        <button id="play" class="primary">Pause</button>
+        <button id="step">Step</button>
+        <button id="reset">Restart from V = 0</button>
+        <button id="defaults">Default parameters</button>
+      </div>
+      <div class="bar">
+        <span class="lbl">Map:</span>
+        <button id="mapRooms">Rooms</button>
+        <button id="mapCliff">Cliff</button>
+        <button id="randMap">Random</button>
+        <button id="clearMap">Clear</button>
+      </div>
+
+      <div class="grid">
+        <label class="slider"
+          >Discount γ <span class="val" id="vG"></span>
+          <input id="sG" type="range" min="0.5" max="0.99" step="0.01"
+        /></label>
+        <label class="slider"
+          >Step reward <span class="val" id="vR"></span>
+          <input id="sR" type="range" min="-0.5" max="0.1" step="0.01"
+        /></label>
+        <label class="slider"
+          >Slip probability <span class="val" id="vS"></span>
+          <input id="sS" type="range" min="0" max="0.6" step="0.01"
+        /></label>
+        <label class="slider"
+          >PI evaluation sweeps per improvement <span class="val" id="vK"></span>
+          <input id="sK" type="range" min="0" max="6" step="1"
+        /></label>
+        <label class="slider"
+          >Speed <span class="val" id="vV"></span>
+          <input id="sV" type="range" min="-0.3" max="1.8" step="0.01"
+        /></label>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="cInplace" /> In-place updates (Gauss–Seidel)</label>
+        <label><input type="checkbox" id="cNums" checked /> Show values</label>
+        <label><input type="checkbox" id="cPolicy" checked /> Show policy</label>
+        <label><input type="checkbox" id="cFlash" checked /> Highlight changes</label>
+      </div>
+    </div>
+
+    <script>
+      "use strict"
+
+      // ---------------------------------------------------------------------
+      // Gridworld MDP with known dynamics
+      // ---------------------------------------------------------------------
+      const COLS = 10,
+        ROWS = 7,
+        N = COLS * ROWS
+      const EMPTY = 0,
+        WALL = 1,
+        LAVA = 2,
+        ICE = 3,
+        GOAL = 4
+      const DIRS = [
+        [0, -1],
+        [1, 0],
+        [0, 1],
+        [-1, 0],
+      ] // up, right, down, left
+      const R_GOAL = 1,
+        R_LAVA = -1,
+        ICE_SLIP = 0.5,
+        THETA = 1e-4,
+        OPT_TOL = 2e-3
+      const K_STEPS = [1, 2, 3, 5, 10, 20, Infinity]
+
+      const DEFAULTS = { gamma: 0.95, rStep: -0.04, slip: 0.2, kIdx: 6, speed: 1 }
+      const P = { ...DEFAULTS }
+      const opt = { inplace: false, nums: true, policy: true, flash: true }
+
+      const map = new Uint8Array(N)
+      const idx = (x, y) => y * COLS + x
+      const cx = (s) => s % COLS
+      const cy = (s) => (s / COLS) | 0
+      const isTerminal = (s) => map[s] === LAVA || map[s] === GOAL
+      const isOpen = (s) => map[s] === EMPTY || map[s] === ICE
+      const slipAt = (s) => (map[s] === ICE ? Math.max(ICE_SLIP, P.slip) : P.slip)
+      const rewardOf = (s2) => (map[s2] === LAVA ? R_LAVA : map[s2] === GOAL ? R_GOAL : P.rStep)
+
+      function place(list, type) {
+        for (const [x, y] of list) map[idx(x, y)] = type
+      }
+      function roomsMap() {
+        map.fill(EMPTY)
+        place(
+          [0, 1, 2, 4, 5, 6].map((y) => [3, y]),
+          WALL,
+        )
+        place(
+          [
+            [7, 2],
+            [7, 3],
+            [7, 4],
+            [8, 4],
+          ],
+          WALL,
+        )
+        place(
+          [
+            [5, 1],
+            [6, 1],
+            [5, 5],
+            [5, 6],
+            [9, 4],
+          ],
+          LAVA,
+        )
+        place(
+          [
+            [1, 3],
+            [1, 4],
+            [2, 3],
+            [2, 4],
+          ],
+          ICE,
+        )
+        map[idx(9, 6)] = GOAL
+      }
+      function cliffMap() {
+        map.fill(EMPTY)
+        for (let x = 1; x <= 8; x++) map[idx(x, 6)] = LAVA
+        map[idx(9, 6)] = GOAL
+      }
+      function randomMap() {
+        map.fill(EMPTY)
+        for (let s = 0; s < N; s++) {
+          const u = Math.random()
+          map[s] = u < 0.16 ? WALL : u < 0.24 ? LAVA : u < 0.32 ? ICE : EMPTY
+        }
+        map[(Math.random() * N) | 0] = GOAL
+      }
+
+      function move(s, a) {
+        const x = cx(s) + DIRS[a][0],
+          y = cy(s) + DIRS[a][1]
+        if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return s
+        const n = idx(x, y)
+        return map[n] === WALL ? s : n
+      }
+      // with probability p the robot slips to one of the two perpendicular directions
+      function backup(V, s, a) {
+        const s2 = move(s, a)
+        return rewardOf(s2) + (isTerminal(s2) ? 0 : P.gamma * V[s2])
+      }
+      function qValue(V, s, a) {
+        const p = slipAt(s)
+        return (1 - p) * backup(V, s, a) + (p / 2) * (backup(V, s, (a + 1) % 4) + backup(V, s, (a + 3) % 4))
+      }
+      function bestQ(V, s) {
+        let b = -Infinity
+        for (let a = 0; a < 4; a++) b = Math.max(b, qValue(V, s, a))
+        return b
+      }
+      function greedy(V, s) {
+        let best = -Infinity,
+          ba = -1,
+          ties = 0
+        for (let a = 0; a < 4; a++) {
+          const q = qValue(V, s, a)
+          if (q > best + 1e-12) {
+            best = q
+            ba = a
+            ties = 1
+          } else if (q > best - 1e-12) ties++
+        }
+        return ba
+      }
+      // all four actions equally good (e.g. before the first sweep): no arrow to draw
+      function allTied(V, s) {
+        const q0 = qValue(V, s, 0)
+        for (let a = 1; a < 4; a++) if (Math.abs(qValue(V, s, a) - q0) > 1e-12) return false
+        return true
+      }
+
+      // reference solution
+      const Vstar = new Float64Array(N)
+      const optimal = [] // per state: list of optimal actions
+      let vScale = 1
+      function computeReference() {
+        Vstar.fill(0)
+        for (let it = 0; it < 20000; it++) {
+          let d = 0
+          for (let s = 0; s < N; s++) {
+            if (!isOpen(s)) continue
+            const v = bestQ(Vstar, s)
+            d = Math.max(d, Math.abs(v - Vstar[s]))
+            Vstar[s] = v
+          }
+          if (d < 1e-12) break
+        }
+        vScale = 1e-9
+        for (let s = 0; s < N; s++) {
+          optimal[s] = []
+          if (!isOpen(s)) continue
+          vScale = Math.max(vScale, Math.abs(Vstar[s]))
+          const qs = [0, 1, 2, 3].map((a) => qValue(Vstar, s, a))
+          const m = Math.max(...qs)
+          qs.forEach((q, a) => {
+            // tolerance: VI stops at max |ΔV| < θ, so its values are only accurate to ~θγ/(1−γ)
+            if (q >= m - OPT_TOL) optimal[s].push(a)
+          })
+        }
+      }
+
+      // one sweep of V <- T V over all open states; returns max |change|
+      function sweep(V, delta, backupFn) {
+        const src = opt.inplace ? V : Float64Array.from(V)
+        let d = 0
+        for (let s = 0; s < N; s++) {
+          if (!isOpen(s)) {
+            V[s] = 0
+            delta[s] = 0
+            continue
+          }
+          const v = backupFn(src, s)
+          delta[s] = v - V[s]
+          d = Math.max(d, Math.abs(delta[s]))
+          V[s] = v
+        }
+        return d
+      }
+
+      function makeSeries() {
+        return { pts: [], stride: 1, n: 0 }
+      }
+      function pushSeries(sr, p) {
+        if (sr.n++ % sr.stride !== 0) return
+        sr.pts.push(p)
+        if (sr.pts.length > 3000) {
+          sr.pts = sr.pts.filter((_, i) => i % 2 === 0)
+          sr.stride *= 2
+        }
+      }
+      function maxErr(V) {
+        let e = 0
+        for (let s = 0; s < N; s++) if (isOpen(s)) e = Math.max(e, Math.abs(V[s] - Vstar[s]))
+        return e
+      }
+      function countWrong(actionOf) {
+        let n = 0
+        for (let s = 0; s < N; s++) {
+          if (!isOpen(s)) continue
+          const a = actionOf(s)
+          if (!optimal[s].includes(a)) n++
+        }
+        return n
+      }
+
+      // ---------------------------------------------------------------------
+      // Value iteration
+      // ---------------------------------------------------------------------
+      const VI = {
+        V: new Float64Array(N),
+        delta: new Float64Array(N),
+        reset() {
+          this.V.fill(0)
+          this.delta.fill(0)
+          this.sweeps = 0
+          this.lastD = null
+          this.done = false
+          this.err = makeSeries()
+          this.wrong = makeSeries()
+          this.record()
+        },
+        action(s) {
+          return greedy(this.V, s)
+        },
+        tick() {
+          if (this.done) return
+          this.lastD = sweep(this.V, this.delta, bestQ)
+          this.sweeps++
+          if (this.lastD < THETA) this.done = true
+          this.record()
+        },
+        record() {
+          pushSeries(this.err, { x: this.sweeps, y: maxErr(this.V) })
+          pushSeries(this.wrong, { x: this.sweeps, y: countWrong((s) => this.action(s)) })
+        },
+      }
+
+      // ---------------------------------------------------------------------
+      // Policy iteration (with an optional cap on the evaluation sweeps:
+      // "modified" or "optimistic" policy iteration)
+      // ---------------------------------------------------------------------
+      const PI = {
+        V: new Float64Array(N),
+        delta: new Float64Array(N),
+        pi: new Int8Array(N),
+        changed: new Float32Array(N),
+        reset() {
+          this.V.fill(0)
+          this.delta.fill(0)
+          this.changed.fill(0)
+          for (let s = 0; s < N; s++) this.pi[s] = (Math.random() * 4) | 0
+          this.sweeps = 0
+          this.k = 0 // evaluation sweeps for the current policy
+          this.policyNo = 0
+          this.phase = "eval"
+          this.lastD = null
+          this.lastChanged = null
+          this.done = false
+          this.err = makeSeries()
+          this.wrong = makeSeries()
+          this.improvements = []
+          this.record()
+        },
+        action(s) {
+          return this.pi[s]
+        },
+        tick() {
+          if (this.done) return
+          if (this.phase === "eval") {
+            this.lastD = sweep(this.V, this.delta, (V, s) => qValue(V, s, this.pi[s]))
+            this.sweeps++
+            this.k++
+            const kMax = K_STEPS[P.kIdx]
+            if (this.lastD < THETA || this.k >= kMax) this.phase = "improve"
+          } else {
+            // greedy improvement; keep the current action on ties so the loop terminates
+            let n = 0
+            this.delta.fill(0)
+            for (let s = 0; s < N; s++) {
+              if (!isOpen(s)) continue
+              const cur = qValue(this.V, s, this.pi[s])
+              let best = cur,
+                ba = this.pi[s]
+              for (let a = 0; a < 4; a++) {
+                const q = qValue(this.V, s, a)
+                if (q > best + 1e-9) {
+                  best = q
+                  ba = a
+                }
+              }
+              if (ba !== this.pi[s]) {
+                this.pi[s] = ba
+                this.changed[s] = 1
+                n++
+              }
+            }
+            this.lastChanged = n
+            this.improvements.push(this.sweeps)
+            this.policyNo++
+            this.k = 0
+            this.phase = "eval"
+            if (n === 0 && this.lastD < THETA) this.done = true
+          }
+          this.record()
+        },
+        record() {
+          pushSeries(this.err, { x: this.sweeps, y: maxErr(this.V) })
+          pushSeries(this.wrong, { x: this.sweeps, y: countWrong((s) => this.pi[s]) })
+        },
+      }
+
+      function mapChanged() {
+        computeReference()
+        for (const A of [VI, PI]) {
+          for (let s = 0; s < N; s++) if (!isOpen(s)) A.V[s] = 0
+          A.done = false
+        }
+        PI.phase = "eval"
+        PI.k = 0
+      }
+      function paramsChanged() {
+        computeReference()
+        VI.done = false
+        PI.done = false
+        PI.phase = "eval"
+        PI.k = 0
+      }
+      function resetAll() {
+        VI.reset()
+        PI.reset()
+      }
+
+      // ---------------------------------------------------------------------
+      // Theme: follow the Quartz site colors when embedded
+      // ---------------------------------------------------------------------
+      const COLORS = {}
+      function readColors() {
+        let src = document.documentElement
+        try {
+          if (window.parent !== window && window.parent.document) {
+            const pr = window.parent.document.documentElement
+            const theme = pr.getAttribute("saved-theme")
+            if (theme) document.documentElement.setAttribute("data-theme", theme)
+            const pcs = getComputedStyle(pr)
+            if (pcs.getPropertyValue("--secondary").trim()) src = pr
+          }
+        } catch (e) {
+          /* cross-origin or standalone */
+        }
+        const cs = getComputedStyle(src)
+        const own = getComputedStyle(document.documentElement)
+        for (const n of [
+          "light",
+          "lightgray",
+          "gray",
+          "darkgray",
+          "dark",
+          "secondary",
+          "tertiary",
+        ]) {
+          const v = cs.getPropertyValue("--" + n).trim() || own.getPropertyValue("--" + n).trim()
+          COLORS[n] = v
+          document.documentElement.style.setProperty("--" + n, v)
+        }
+        for (const n of ["danger", "vi", "goal", "flash"])
+          COLORS[n] = own.getPropertyValue("--" + n).trim()
+        draw()
+      }
+      function watchTheme() {
+        try {
+          if (window.parent !== window) {
+            new MutationObserver(readColors).observe(window.parent.document.documentElement, {
+              attributes: true,
+              attributeFilter: ["saved-theme", "class", "style"],
+            })
+          }
+        } catch (e) {}
+        if (window.matchMedia)
+          window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", readColors)
+      }
+      const probeCtx = document.createElement("canvas").getContext("2d")
+      function withAlpha(color, a) {
+        const ctx = probeCtx
+        ctx.fillStyle = "#000"
+        ctx.fillStyle = color
+        const c = ctx.fillStyle
+        if (c[0] === "#") {
+          const r = parseInt(c.slice(1, 3), 16),
+            g = parseInt(c.slice(3, 5), 16),
+            b = parseInt(c.slice(5, 7), 16)
+          return `rgba(${r},${g},${b},${a})`
+        }
+        const m = c.match(/[\d.]+/g)
+        return m ? `rgba(${m[0]},${m[1]},${m[2]},${a})` : color
+      }
+
+      // ---------------------------------------------------------------------
+      // Grid rendering
+      // ---------------------------------------------------------------------
+      const panels = [
+        { A: VI, cv: document.getElementById("cvVI"), st: document.getElementById("stVI") },
+        { A: PI, cv: document.getElementById("cvPI"), st: document.getElementById("stPI") },
+      ]
+      for (const p of panels) p.ctx = p.cv.getContext("2d")
+      let hover = -1
+      let flashT = 0 // fades the change highlights after each tick
+
+      function resize() {
+        const dpr = window.devicePixelRatio || 1
+        for (const p of panels) {
+          const w = p.cv.parentElement.clientWidth
+          const h = (w * ROWS) / COLS
+          p.cv.width = Math.round(w * dpr)
+          p.cv.height = Math.round(h * dpr)
+          p.cv.style.height = h + "px"
+          p.ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+          p.w = w
+          p.h = h
+          p.c = w / COLS
+        }
+        draw()
+        fitFrame()
+      }
+
+      function drawArrow(ctx, x, y, a, len, head) {
+        const [dx, dy] = DIRS[a]
+        const x0 = x - dx * len,
+          y0 = y - dy * len,
+          x1 = x + dx * len,
+          y1 = y + dy * len
+        ctx.beginPath()
+        ctx.moveTo(x0, y0)
+        ctx.lineTo(x1, y1)
+        ctx.moveTo(x1 - dx * head - dy * head * 0.8, y1 - dy * head + dx * head * 0.8)
+        ctx.lineTo(x1, y1)
+        ctx.lineTo(x1 - dx * head + dy * head * 0.8, y1 - dy * head - dx * head * 0.8)
+        ctx.stroke()
+      }
+
+      function drawPanel(p) {
+        const { ctx, w, h, c, A } = p
+        if (!w) return
+        ctx.clearRect(0, 0, w, h)
+        ctx.fillStyle = COLORS.light
+        ctx.fillRect(0, 0, w, h)
+        const showNums = opt.nums && c >= 26
+
+        for (let s = 0; s < N; s++) {
+          const x = cx(s) * c,
+            y = cy(s) * c,
+            t = map[s]
+          if (t === WALL) {
+            ctx.fillStyle = withAlpha(COLORS.dark, 0.78)
+            ctx.fillRect(x, y, c, c)
+          } else if (t === LAVA) {
+            ctx.fillStyle = withAlpha(COLORS.danger, 0.45)
+            ctx.fillRect(x, y, c, c)
+            ctx.strokeStyle = withAlpha(COLORS.danger, 0.95)
+            ctx.lineWidth = Math.max(1, c * 0.045)
+            for (const yy of [0.38, 0.66]) {
+              const yv = y + yy * c
+              ctx.beginPath()
+              ctx.moveTo(x + 0.18 * c, yv)
+              ctx.quadraticCurveTo(x + 0.34 * c, yv - 0.1 * c, x + 0.5 * c, yv)
+              ctx.quadraticCurveTo(x + 0.66 * c, yv + 0.1 * c, x + 0.82 * c, yv)
+              ctx.stroke()
+            }
+          } else if (t === GOAL) {
+            ctx.fillStyle = withAlpha(COLORS.goal, 0.22)
+            ctx.fillRect(x, y, c, c)
+            ctx.strokeStyle = COLORS.goal
+            ctx.fillStyle = COLORS.goal
+            ctx.lineWidth = Math.max(1.2, c * 0.06)
+            ctx.beginPath()
+            ctx.arc(x + c / 2, y + c / 2, c * 0.3, 0, 2 * Math.PI)
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.arc(x + c / 2, y + c / 2, c * 0.11, 0, 2 * Math.PI)
+            ctx.fill()
+          } else {
+            // diverging shading: blue for positive values, red for negative ones
+            const v = A.V[s] / vScale
+            const col = v >= 0 ? COLORS.secondary : COLORS.danger
+            ctx.fillStyle = withAlpha(col, Math.min(0.75, 0.75 * Math.abs(v)))
+            ctx.fillRect(x, y, c, c)
+            if (t === ICE) {
+              ctx.save()
+              ctx.beginPath()
+              ctx.rect(x, y, c, c)
+              ctx.clip()
+              ctx.strokeStyle = withAlpha(COLORS.darkgray, 0.35)
+              ctx.lineWidth = 1
+              ctx.beginPath()
+              for (let i = 0; i <= 8; i++) {
+                const o = (i * c) / 4 - c
+                ctx.moveTo(x + o, y + c)
+                ctx.lineTo(x + o + c, y)
+              }
+              ctx.stroke()
+              ctx.restore()
+            }
+          }
+        }
+
+        ctx.strokeStyle = COLORS.lightgray
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        for (let i = 1; i < COLS; i++) {
+          const x = Math.round(i * c) + 0.5
+          ctx.moveTo(x, 0)
+          ctx.lineTo(x, h)
+        }
+        for (let j = 1; j < ROWS; j++) {
+          const y = Math.round(j * c) + 0.5
+          ctx.moveTo(0, y)
+          ctx.lineTo(w, y)
+        }
+        ctx.stroke()
+
+        // highlights: value changes of the last sweep, and changed actions after an improvement
+        if (opt.flash && flashT > 0.02) {
+          for (let s = 0; s < N; s++) {
+            if (!isOpen(s)) continue
+            const x = cx(s) * c,
+              y = cy(s) * c
+            const dv = Math.min(1, Math.abs(A.delta[s]) / (0.15 * vScale))
+            if (dv > 0.02) {
+              ctx.fillStyle = withAlpha(COLORS.flash, 0.45 * dv * flashT)
+              ctx.fillRect(x, y, c, c)
+            }
+            if (A === PI && PI.changed[s] > 0.02) {
+              ctx.strokeStyle = withAlpha(COLORS.flash, Math.min(1, PI.changed[s]))
+              ctx.lineWidth = 2.5
+              ctx.strokeRect(x + 1.5, y + 1.5, c - 3, c - 3)
+            }
+          }
+        }
+
+        for (let s = 0; s < N; s++) {
+          if (!isOpen(s)) continue
+          const x = cx(s) * c,
+            y = cy(s) * c
+          if (opt.policy) {
+            const a = A.action(s)
+            if (A === PI || !allTied(A.V, s)) {
+              const wrong = !optimal[s].includes(a)
+              ctx.strokeStyle = wrong ? withAlpha(COLORS.danger, 0.9) : withAlpha(COLORS.dark, 0.7)
+              ctx.lineWidth = Math.max(1.1, c * 0.05)
+              ctx.lineCap = "round"
+              ctx.lineJoin = "round"
+              const yc = showNums ? y + c * 0.64 : y + c * 0.5
+              drawArrow(ctx, x + c / 2, yc, a, c * (showNums ? 0.16 : 0.2), c * 0.1)
+            }
+          }
+          if (showNums) {
+            ctx.fillStyle = COLORS.dark
+            ctx.font = `${Math.round(c * 0.24)}px "IBM Plex Mono", ui-monospace, monospace`
+            ctx.textAlign = "center"
+            ctx.textBaseline = "middle"
+            ctx.fillText(fmt(A.V[s], 2), x + c / 2, y + c * (opt.policy ? 0.26 : 0.5))
+          }
+        }
+
+        if (hover >= 0) {
+          ctx.strokeStyle = COLORS.dark
+          ctx.lineWidth = 2
+          ctx.strokeRect(cx(hover) * c + 1, cy(hover) * c + 1, c - 2, c - 2)
+        }
+      }
+
+      const fmt = (v, d = 2) =>
+        v === null || v === undefined ? "–" : (Math.abs(v) < 0.005 && d === 2 ? 0 : v).toFixed(d).replace("-", "−")
+      const fmtE = (v) => (v === null ? "–" : v < 1e-3 ? v.toExponential(1) : v.toFixed(4))
+
+      function updateStatus() {
+        const vw = countWrong((s) => VI.action(s))
+        panels[0].st.innerHTML = VI.done
+          ? `converged after ${VI.sweeps} sweeps (max |ΔV| < ${THETA})<br><b>greedy policy: ${vw} suboptimal actions</b>`
+          : `sweep ${VI.sweeps} · max |ΔV| = ${fmtE(VI.lastD)}<br><b>greedy policy w.r.t. V: ${vw} suboptimal actions</b>`
+        const pw = countWrong((s) => PI.pi[s])
+        let l1, l2
+        if (PI.done) {
+          l1 = `policy stable after ${PI.policyNo} improvements, ${PI.sweeps} sweeps`
+          l2 = `<b>π${sub(PI.policyNo)} is optimal (${pw} suboptimal actions)</b>`
+        } else if (PI.phase === "improve" || (PI.k === 0 && PI.lastChanged !== null)) {
+          l1 = `sweep ${PI.sweeps} · ${PI.k === 0 ? "improved the policy" : "evaluation done"}`
+          l2 =
+            PI.k === 0
+              ? `<b>π${sub(PI.policyNo)}: ${PI.lastChanged} actions changed · ${pw} suboptimal</b>`
+              : `<b>next: greedy improvement of π${sub(PI.policyNo)}</b>`
+        } else {
+          l1 = `sweep ${PI.sweeps} · evaluating π${sub(PI.policyNo)} (sweep ${PI.k}) · max |ΔV| = ${fmtE(PI.lastD)}`
+          l2 = `<b>policy π${sub(PI.policyNo)}: ${pw} suboptimal actions</b>`
+        }
+        panels[1].st.innerHTML = l1 + "<br>" + l2
+      }
+      const sub = (n) =>
+        String(n)
+          .split("")
+          .map((d) => "₀₁₂₃₄₅₆₇₈₉"[+d])
+          .join("")
+
+      const ARROWS = ["↑", "→", "↓", "←"]
+      const readout = document.getElementById("readout")
+      function updateReadout() {
+        if (hover < 0) {
+          readout.innerHTML =
+            "Hover over a cell to see its one-step lookahead Q(s,a) = Σ p(s'|s,a) [r + γ V(s')].<br>Click and drag to paint the map."
+          return
+        }
+        const s = hover
+        if (!isOpen(s)) {
+          readout.textContent = `cell (${cx(s)}, ${cy(s)}) · ${["empty", "wall", "lava", "ice", "goal"][map[s]]}`
+          return
+        }
+        const qs = (V) => [0, 1, 2, 3].map((a) => `${ARROWS[a]}${fmt(qValue(V, s, a))}`).join(" ")
+        readout.innerHTML =
+          `cell (${cx(s)}, ${cy(s)}) · V* ${fmt(Vstar[s], 3)} · optimal ${optimal[s].map((a) => ARROWS[a]).join("")}<br>` +
+          `VI: V ${fmt(VI.V[s], 3)} · Q ${qs(VI.V)}<br>` +
+          `PI: V<sup>π</sup> ${fmt(PI.V[s], 3)} · π(s) ${ARROWS[PI.pi[s]]} · Q ${qs(PI.V)}`
+      }
+
+      // ---------------------------------------------------------------------
+      // Plots
+      // ---------------------------------------------------------------------
+      const plots = {
+        err: { cv: document.getElementById("pErr") },
+        pol: { cv: document.getElementById("pPol") },
+      }
+      for (const k in plots) plots[k].ctx = plots[k].cv.getContext("2d")
+      function resizePlots() {
+        const dpr = window.devicePixelRatio || 1
+        for (const k in plots) {
+          const p = plots[k]
+          const w = p.cv.clientWidth,
+            h = p.cv.clientHeight
+          p.cv.width = Math.round(w * dpr)
+          p.cv.height = Math.round(h * dpr)
+          p.ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+          p.w = w
+          p.h = h
+        }
+      }
+      function niceStep(span, n) {
+        const raw = span / n
+        const mag = Math.pow(10, Math.floor(Math.log10(raw)))
+        const f = raw / mag
+        return Math.max(1e-9, (f >= 5 ? 10 : f >= 2 ? 5 : f >= 1.5 ? 2 : 1) * mag)
+      }
+
+      function drawPlot(p, series, { log, marks }) {
+        const { ctx, w, h } = p
+        if (!w) return
+        ctx.clearRect(0, 0, w, h)
+        const L = 40,
+          R = 8,
+          T = 6,
+          B = 20
+        const tf = (y) => (log ? Math.log10(Math.max(y, 1e-6)) : y)
+        let xMax = 10,
+          lo = log ? -4 : 0,
+          hi = log ? 0 : 1
+        for (const sr of series)
+          for (const q of sr.pts) {
+            xMax = Math.max(xMax, q.x)
+            lo = Math.min(lo, tf(q.y))
+            hi = Math.max(hi, tf(q.y))
+          }
+        if (log) {
+          lo = Math.floor(lo)
+          hi = Math.ceil(hi)
+        }
+        const X = (x) => L + (x / xMax) * (w - L - R)
+        const Y = (y) => T + (1 - (y - lo) / (hi - lo)) * (h - T - B)
+
+        ctx.font = '10.5px "IBM Plex Mono", ui-monospace, monospace'
+        ctx.fillStyle = COLORS.gray
+        ctx.strokeStyle = COLORS.lightgray
+        ctx.lineWidth = 1
+        ctx.textAlign = "right"
+        ctx.textBaseline = "middle"
+        const ys = log ? Math.max(1, Math.ceil((hi - lo) / 5)) : Math.max(1, niceStep(hi - lo, 4))
+        for (let v = Math.ceil(lo / ys) * ys; v <= hi + 1e-9; v += ys) {
+          const y = Math.round(Y(v)) + 0.5
+          ctx.beginPath()
+          ctx.moveTo(L, y)
+          ctx.lineTo(w - R, y)
+          ctx.stroke()
+          ctx.fillText(log ? (v === 0 ? "1" : "1e" + v).replace("-", "−") : String(+v.toFixed(2)), L - 5, y)
+        }
+        ctx.textAlign = "center"
+        ctx.textBaseline = "top"
+        const xs = Math.max(1, niceStep(xMax, Math.max(2, Math.floor((w - L) / 60))))
+        for (let v = 0; v <= xMax + 1e-9; v += xs) ctx.fillText(String(v), X(v), h - B + 5)
+        ctx.textAlign = "right"
+        ctx.textBaseline = "bottom"
+        ctx.fillText("sweeps", w - R, h - B - 2)
+
+        ctx.save()
+        ctx.beginPath()
+        ctx.rect(L, T - 2, w - L - R, h - T - B + 4)
+        ctx.clip()
+        // policy improvements of PI as small ticks along the bottom
+        if (marks) {
+          ctx.strokeStyle = withAlpha(COLORS.secondary, 0.6)
+          ctx.lineWidth = 1.5
+          ctx.beginPath()
+          for (const m of marks) {
+            const x = Math.round(X(m)) + 0.5
+            ctx.moveTo(x, h - B)
+            ctx.lineTo(x, h - B - 7)
+          }
+          ctx.stroke()
+        }
+        for (const sr of series) {
+          if (!sr.pts.length) continue
+          ctx.strokeStyle = sr.color
+          ctx.lineWidth = 2
+          ctx.lineJoin = "round"
+          ctx.beginPath()
+          sr.pts.forEach((q, i) => (i ? ctx.lineTo(X(q.x), Y(tf(q.y))) : ctx.moveTo(X(q.x), Y(tf(q.y)))))
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+
+      function drawPlots() {
+        drawPlot(
+          plots.err,
+          [
+            { pts: VI.err.pts, color: COLORS.vi },
+            { pts: PI.err.pts, color: COLORS.secondary },
+          ],
+          { log: true, marks: PI.improvements },
+        )
+        drawPlot(
+          plots.pol,
+          [
+            { pts: VI.wrong.pts, color: COLORS.vi },
+            { pts: PI.wrong.pts, color: COLORS.secondary },
+          ],
+          { marks: PI.improvements },
+        )
+      }
+
+      function draw() {
+        if (!COLORS.light) return
+        for (const p of panels) drawPanel(p)
+        drawPlots()
+        updateStatus()
+      }
+
+      // ---------------------------------------------------------------------
+      // Painting
+      // ---------------------------------------------------------------------
+      let tool = "wall"
+      let painting = false,
+        paintTool = null,
+        lastPainted = -1
+      function cellAt(p, ev) {
+        const r = p.cv.getBoundingClientRect()
+        const x = Math.floor(((ev.clientX - r.left) / r.width) * COLS)
+        const y = Math.floor(((ev.clientY - r.top) / r.height) * ROWS)
+        if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return -1
+        return idx(x, y)
+      }
+      function applyTool(s, t) {
+        const type = { wall: WALL, lava: LAVA, ice: ICE, goal: GOAL, erase: EMPTY }[t]
+        if (map[s] === type) return
+        map[s] = type
+        mapChanged()
+      }
+      for (const p of panels) {
+        p.cv.addEventListener("pointerdown", (ev) => {
+          const s = cellAt(p, ev)
+          if (s < 0) return
+          ev.preventDefault()
+          painting = true
+          paintTool = ev.button === 2 ? "erase" : tool
+          p.cv.setPointerCapture(ev.pointerId)
+          applyTool(s, paintTool)
+          lastPainted = s
+          draw()
+        })
+        p.cv.addEventListener("pointermove", (ev) => {
+          const s = cellAt(p, ev)
+          hover = s
+          if (painting && s >= 0 && s !== lastPainted) {
+            applyTool(s, paintTool)
+            lastPainted = s
+          }
+          updateReadout()
+        })
+        const end = () => {
+          painting = false
+          lastPainted = -1
+        }
+        p.cv.addEventListener("pointerup", end)
+        p.cv.addEventListener("pointercancel", end)
+        p.cv.addEventListener("pointerleave", () => {
+          hover = -1
+          updateReadout()
+        })
+        p.cv.addEventListener("contextmenu", (ev) => ev.preventDefault())
+      }
+      document.querySelectorAll("#tools button").forEach((b) =>
+        b.addEventListener("click", () => {
+          tool = b.dataset.tool
+          document
+            .querySelectorAll("#tools button")
+            .forEach((o) => o.setAttribute("aria-pressed", o === b ? "true" : "false"))
+        }),
+      )
+
+      // ---------------------------------------------------------------------
+      // Controls
+      // ---------------------------------------------------------------------
+      let running = true
+      const sliders = [
+        ["sG", "vG", "gamma", (v) => v.toFixed(2), true],
+        ["sR", "vR", "rStep", (v) => fmt(v, 2), true],
+        ["sS", "vS", "slip", (v) => v.toFixed(2), true],
+        ["sK", "vK", "kIdx", (v) => (K_STEPS[v] === Infinity ? "until converged" : String(K_STEPS[v])), false],
+        ["sV", "vV", "speed", (v) => {
+          const r = Math.pow(10, v)
+          return (r < 10 ? r.toFixed(1) : Math.round(r)) + " sweeps/s"
+        }, false],
+      ]
+      function syncSliders() {
+        for (const [sid, vid, key, f] of sliders) {
+          document.getElementById(sid).value = P[key]
+          document.getElementById(vid).textContent = f(P[key])
+        }
+      }
+      for (const [sid, vid, key, f, mdp] of sliders) {
+        document.getElementById(sid).addEventListener("input", (e) => {
+          P[key] = parseFloat(e.target.value)
+          document.getElementById(vid).textContent = f(P[key])
+          if (mdp) paramsChanged()
+          else if (key === "kIdx") PI.done = false
+          draw()
+          updateReadout()
+        })
+      }
+      function setRunning(r) {
+        running = r
+        document.getElementById("play").textContent = r ? "Pause" : "Play"
+      }
+      function tick() {
+        VI.tick()
+        PI.tick()
+        flashT = 1
+      }
+      document.getElementById("play").addEventListener("click", () => setRunning(!running))
+      document.getElementById("step").addEventListener("click", () => {
+        setRunning(false)
+        tick()
+        draw()
+        updateReadout()
+      })
+      document.getElementById("reset").addEventListener("click", () => {
+        resetAll()
+        draw()
+      })
+      document.getElementById("defaults").addEventListener("click", () => {
+        Object.assign(P, DEFAULTS)
+        syncSliders()
+        paramsChanged()
+        draw()
+      })
+      function loadMap(fn) {
+        fn()
+        computeReference()
+        resetAll()
+        draw()
+      }
+      document.getElementById("mapRooms").addEventListener("click", () => loadMap(roomsMap))
+      document.getElementById("mapCliff").addEventListener("click", () => loadMap(cliffMap))
+      document.getElementById("randMap").addEventListener("click", () => loadMap(randomMap))
+      document.getElementById("clearMap").addEventListener("click", () => {
+        for (let s = 0; s < N; s++) if (map[s] !== GOAL) map[s] = EMPTY
+        mapChanged()
+        draw()
+      })
+      for (const [id, key] of [
+        ["cInplace", "inplace"],
+        ["cNums", "nums"],
+        ["cPolicy", "policy"],
+        ["cFlash", "flash"],
+      ]) {
+        document.getElementById(id).addEventListener("change", (e) => {
+          opt[key] = e.target.checked
+          draw()
+        })
+      }
+
+      // ---------------------------------------------------------------------
+      // Embedding: size the parent iframe to fit the content
+      // ---------------------------------------------------------------------
+      function fitFrame() {
+        try {
+          const fe = window.frameElement
+          const h = Math.ceil(document.getElementById("wrap").getBoundingClientRect().height)
+          if (fe) fe.style.height = h + 4 + "px"
+        } catch (e) {}
+      }
+
+      // ---------------------------------------------------------------------
+      // Main loop
+      // ---------------------------------------------------------------------
+      let last = performance.now(),
+        acc = 0
+      function frame(now) {
+        const dt = Math.min(0.1, (now - last) / 1000)
+        last = now
+        const rate = Math.pow(10, P.speed)
+        if (running) {
+          acc += dt * rate
+          let n = Math.floor(acc)
+          acc -= n
+          n = Math.min(n, 10)
+          for (let i = 0; i < n; i++) tick()
+          if (n && hover >= 0) updateReadout()
+        }
+        const decay = Math.exp(-dt / Math.max(0.1, Math.min(0.6, 0.8 / rate)))
+        flashT *= decay
+        for (let s = 0; s < N; s++) PI.changed[s] *= Math.exp(-dt / 0.9)
+        draw()
+        requestAnimationFrame(frame)
+      }
+
+      roomsMap()
+      computeReference()
+      resetAll()
+      syncSliders()
+      updateReadout()
+      readColors()
+      watchTheme()
+      new ResizeObserver(resize).observe(document.querySelector(".panels"))
+      new ResizeObserver(() => {
+        resizePlots()
+        draw()
+      }).observe(document.querySelector(".plots"))
+      resizePlots()
+      new ResizeObserver(fitFrame).observe(document.getElementById("wrap"))
+      resize()
+      requestAnimationFrame(frame)
+    </script>
+  </body>
+</html>
