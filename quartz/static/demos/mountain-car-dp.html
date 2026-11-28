@@ -321,7 +321,7 @@
         </figure>
         <figure class="plot">
           <figcaption>
-            Decisions to the goal from the start
+            Decisions to the goal from (−0.5, 0)
             <span class="key"><i class="dot vi"></i>VI</span>
             <span class="key"><i class="dot pi"></i>PI</span>
           </figcaption>
@@ -337,6 +337,8 @@
         <span class="lbl" style="margin-left: 8px">Show:</span>
         <button id="vValue" aria-pressed="true">Value</button>
         <button id="vPolicy" aria-pressed="false">Policy</button>
+        <span class="lbl" style="margin-left: 8px">Start:</span>
+        <button id="randStart" aria-pressed="true">random x ∈ [−0.6, −0.4)</button>
       </div>
       <div class="grid">
         <label class="slider"
@@ -361,7 +363,7 @@
         /></label>
       </div>
       <div class="toggles">
-        <label><input type="checkbox" id="cTraj" checked /> Show trajectory from the start state</label>
+        <label><input type="checkbox" id="cTraj" checked /> Show trajectory from the current start state</label>
       </div>
     </div>
 
@@ -380,13 +382,26 @@
         VMAX = 0.07,
         REPEAT = 4,
         THETA = 1e-3,
-        MAX_DECISIONS = 300
+        MAX_DECISIONS = 150
       const K_STEPS = [1, 2, 3, 5, 10, 20, Infinity]
       const ACT = [-1, 0, 1]
-      const DEFAULTS = { n: 41, gamma: 0.99, force: 0.001, kIdx: 6, speed: 1.1 }
+      const DEFAULTS = { n: 81, gamma: 0.99, force: 0.001, kIdx: 6, speed: 1.1 }
       const P = { ...DEFAULTS }
       const opt = { view: "value", traj: true }
+      // Start state of the cars. As in Sutton & Barto (Example 10.1), each episode starts at rest
+      // at a position drawn uniformly from [-0.6, -0.4), unless a start state was clicked on a map.
+      const START_LO = -0.6,
+        START_HI = -0.4
+      let fixedStart = null
       let start = { x: -0.5, v: 0 }
+      function drawStart() {
+        start = fixedStart ? { ...fixedStart } : { x: START_LO + Math.random() * (START_HI - START_LO), v: 0 }
+      }
+      // both cars always start a new episode together from the same state, so they stay comparable
+      function restartCars() {
+        drawStart()
+        for (const c of cars) c.restart()
+      }
 
       let NX, NV, NG
       let tIdx, tW, tTerm // transitions per (grid point, action): 4 neighbours and weights
@@ -612,7 +627,7 @@
         computeReference()
         VI.reset()
         PI.reset()
-        for (const c of cars) c.restart()
+        restartCars()
       }
 
       // ---------------------------------------------------------------------
@@ -676,10 +691,10 @@
             `<span><i class="sw" style="background:${withAlpha(COLORS.danger, 0.75)}"></i>push left</span>` +
             `<span><i class="sw" style="background:${withAlpha(COLORS.gray, 0.45)}"></i>coast</span>` +
             `<span><i class="sw" style="background:${withAlpha(COLORS.goal, 0.75)}"></i>push right</span>` +
-            `<span>· click the map to set the start state</span>`
+            `<span>· click the map to fix the start state</span>`
         else
           el.innerHTML =
-            `<span>darker = fewer decisions to the goal · click the map to set the start state</span>`
+            `<span>darker = fewer decisions to the goal · click the map to fix the start state</span>`
       }
 
       // ---------------------------------------------------------------------
@@ -800,6 +815,16 @@
           ctx.fill()
           ctx.stroke()
         }
+        // range the random start position is drawn from
+        if (!fixedStart) {
+          ctx.strokeStyle = COLORS.dark
+          ctx.lineWidth = 3
+          ctx.lineCap = "round"
+          ctx.beginPath()
+          ctx.moveTo(toX(p, START_LO), toY(p, 0))
+          ctx.lineTo(toX(p, START_HI), toY(p, 0))
+          ctx.stroke()
+        }
         // start marker
         ctx.fillStyle = COLORS.light
         ctx.strokeStyle = COLORS.dark
@@ -863,8 +888,7 @@
         advance(dt) {
           if (!NG) return
           if (this.done) {
-            this.wait -= dt
-            if (this.wait <= 0) this.restart()
+            this.wait = Math.max(0, this.wait - dt)
             return
           }
           this.acc = (this.acc || 0) + dt * 60 // simulation steps per second
@@ -884,11 +908,12 @@
             if (this.x >= XMAX || this.d >= MAX_DECISIONS) {
               this.done = true
               this.reached = this.x >= XMAX
-              this.wait = 1
+              this.wait = 0.5
             }
           }
         }
       }
+      drawStart()
       const cars = [new Car(VI), new Car(PI)]
       panels.forEach((p, i) => (p.car_ = cars[i]))
 
@@ -1152,9 +1177,8 @@
         p.hm.addEventListener("pointerdown", (ev) => {
           const s = stateAt(p, ev)
           if (!s) return
-          start = { x: Math.min(s.x, XMAX - 0.02), v: s.v }
-          for (const c of cars) c.restart()
-          draw()
+          fixedStart = { x: Math.min(s.x, XMAX - 0.02), v: s.v }
+          setRandomStart(false)
         })
       }
 
@@ -1212,7 +1236,7 @@
       document.getElementById("reset").addEventListener("click", () => {
         VI.reset()
         PI.reset()
-        for (const c of cars) c.restart()
+        restartCars()
         draw()
       })
       document.getElementById("defaults").addEventListener("click", () => {
@@ -1228,6 +1252,15 @@
         buildLegend()
         draw()
       }
+      // random start (the book's setting) or the start state last clicked on a map
+      function setRandomStart(random) {
+        if (random) fixedStart = null
+        document.getElementById("randStart").setAttribute("aria-pressed", random)
+        buildLegend()
+        restartCars()
+        draw()
+      }
+      document.getElementById("randStart").addEventListener("click", () => setRandomStart(true))
       document.getElementById("vValue").addEventListener("click", () => setView("value"))
       document.getElementById("vPolicy").addEventListener("click", () => setView("policy"))
       document.getElementById("cTraj").addEventListener("change", (e) => {
@@ -1262,6 +1295,8 @@
         // pausing freezes everything: the sweeps, the cars (and their live state) and the highlights
         if (running) {
           for (const c of cars) c.advance(dt)
+          // a car that finished early waits for the other one, then both restart together
+          if (cars.every((c) => c.done && c.wait <= 0)) restartCars()
           if (PI.changed) for (let s = 0; s < NG; s++) PI.changed[s] *= Math.exp(-dt / 1.2)
         }
         if (ticked) draw()
