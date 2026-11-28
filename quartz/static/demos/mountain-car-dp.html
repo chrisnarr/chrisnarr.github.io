@@ -1257,8 +1257,11 @@
           ticked = n > 0
           if (ticked && hover) updateReadout()
         }
-        for (const c of cars) c.advance(dt)
-        if (PI.changed) for (let s = 0; s < NG; s++) PI.changed[s] *= Math.exp(-dt / 1.2)
+        // pausing freezes everything: the sweeps, the cars (and their live state) and the highlights
+        if (running) {
+          for (const c of cars) c.advance(dt)
+          if (PI.changed) for (let s = 0; s < NG; s++) PI.changed[s] *= Math.exp(-dt / 1.2)
+        }
         if (ticked) draw()
         else if (COLORS.light && Vstar) for (const p of panels) drawMap(p)
         drawCars()
