@@ -7,7 +7,7 @@ draft: false
 <iframe src="/static/demos/td-mc.html" title="TD vs. MC gridworld" style="width: 100%; height: 1150px; border: none;" loading="lazy"></iframe>
 
 Two robots learn to reach the goal in the same gridworld, which starts out as the classic *cliff walking* task (Sutton & Barto, Example 6.6): the left one with **Monte Carlo (MC)** control and the right one with **temporal-difference (TD)** control (SARSA or Q-learning).
-**Click and drag** on either map to paint walls, lava, ice, goals or the start cell with the selected tool (**right-click** erases), and watch how both agents adapt.
+**Click and drag** on either map to paint walls, lava, goals or the start cell with the selected tool (**right-click** erases), and watch how both agents adapt.
 
 Each cell is shaded by its estimated value $\max_a Q(s,a)$: darker means more valuable, and a small dot means that the cell has never been updated. The arrows show the greedy policy.
 The **highlighted** cells are the ones whose Q-values were just updated: TD updates one cell right behind the robot on every step, while MC waits (dashed trail) and then updates the whole episode at once.
@@ -17,7 +17,7 @@ The plots show the return of each episode (dots, with a moving average), how oft
 
 ## Setup
 
-The robot moves up, down, left or right. On **ice**, it slips to one of the two perpendicular directions with probability $0.5$ (the slip slider adds the same randomness everywhere). Walls and the border block movement.
+The robot moves up, down, left or right, but with the slip probability (0 by default) it slips to one of the two perpendicular directions instead. Walls and the border block movement.
 Every step costs $-0.02$. Reaching a **goal** gives $+1$ and stepping into **lava** gives $-1$, and both end the episode. Episodes are also cut off after 100 steps.
 Both agents explore with an $\varepsilon$-greedy policy and start from $Q = 0$. By default every episode starts at **S**; with *exploring starts* it starts in a random open cell instead.
 
@@ -62,5 +62,5 @@ SARSA is *on-policy*: it learns the value of the $\varepsilon$-greedy policy it 
 - **Learning rate $\alpha$:** how far each update moves the estimate towards its target. Large values learn fast but noisily, especially for MC, whose targets vary a lot.
 - **Exploration $\varepsilon$:** the probability of taking a random action instead of the greedy one.
 - **Discount $\gamma$:** how much future rewards count; smaller values make the agent short-sighted.
-- **Slip probability:** the chance of slipping sideways on every cell (ice cells always slip with at least $0.5$).
+- **Slip probability:** the chance of slipping sideways instead of moving in the chosen direction.
 - **Speed:** environment steps per second; both agents always take the same number of steps.

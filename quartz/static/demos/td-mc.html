@@ -208,13 +208,6 @@
         background: color-mix(in srgb, var(--danger) 60%, transparent);
         border-color: var(--danger);
       }
-      .sw-ice {
-        background: repeating-linear-gradient(
-          135deg,
-          transparent 0 3px,
-          color-mix(in srgb, var(--darkgray) 55%, transparent) 3px 4px
-        );
-      }
       .sw-goal {
         background: color-mix(in srgb, var(--goal) 35%, transparent);
         border-color: var(--goal);
@@ -335,7 +328,6 @@
         <span class="lbl">Paint:</span>
         <button data-tool="wall" aria-pressed="true"><i class="sw sw-wall"></i>Wall</button>
         <button data-tool="lava" aria-pressed="false"><i class="sw sw-lava"></i>Lava</button>
-        <button data-tool="ice" aria-pressed="false"><i class="sw sw-ice"></i>Ice</button>
         <button data-tool="goal" aria-pressed="false"><i class="sw sw-goal"></i>Goal</button>
         <button data-tool="start" aria-pressed="false"><i class="sw sw-start">S</i>Start</button>
         <button data-tool="erase" aria-pressed="false"><i class="sw sw-erase"></i>Erase</button>
@@ -399,8 +391,8 @@
       </div>
       <div class="bar">
         <span class="lbl">Initial state:</span>
-        <button id="stFixed" aria-pressed="true">at S</button>
-        <button id="stRandom" aria-pressed="false">in a random cell (exploring starts)</button>
+        <button id="stFixed" aria-pressed="true">S cell</button>
+        <button id="stRandom" aria-pressed="false">random cell (exploring starts)</button>
       </div>
 
       <div class="grid">
@@ -417,7 +409,7 @@
           <input id="sG" type="range" min="0.5" max="0.99" step="0.01"
         /></label>
         <label class="slider"
-          >Slip probability (everywhere) <span class="val" id="vS"></span>
+          >Slip probability <span class="val" id="vS"></span>
           <input id="sS" type="range" min="0" max="0.5" step="0.01"
         /></label>
         <label class="slider"
@@ -445,7 +437,6 @@
       const EMPTY = 0,
         WALL = 1,
         LAVA = 2,
-        ICE = 3,
         GOAL = 4
       const DIRS = [
         [0, -1],
@@ -457,7 +448,6 @@
         R_LAVA = -1,
         R_GOAL = 1
       const MAX_STEPS = 100 // episodes are truncated after this many steps
-      const ICE_SLIP = 0.5 // slip probability on ice cells
 
       const DEFAULTS = { alpha: 0.1, eps: 0.1, gamma: 0.95, slip: 0, speed: 2.3 }
       const P = { ...DEFAULTS }
@@ -481,13 +471,13 @@
       }
 
       const isTerminal = (s) => map[s] === LAVA || map[s] === GOAL
-      const isOpen = (s) => map[s] === EMPTY || map[s] === ICE
-      const slipAt = (s) => (map[s] === ICE ? Math.max(ICE_SLIP, P.slip) : P.slip)
+      const isOpen = (s) => map[s] === EMPTY
+      const slipAt = () => P.slip // the same randomness in every state
       const rewardOf = (s2) => (map[s2] === LAVA ? R_LAVA : map[s2] === GOAL ? R_GOAL : R_STEP)
 
       function randomOpenCell() {
         const open = []
-        for (let s = 0; s < N; s++) if (map[s] === EMPTY || map[s] === ICE) open.push(s)
+        for (let s = 0; s < N; s++) if (map[s] === EMPTY) open.push(s)
         return open.length ? open[(Math.random() * open.length) | 0] : start
       }
 
@@ -906,22 +896,6 @@
               ctx.arc(x + c / 2, y + c / 2, Math.max(1, c * 0.04), 0, 2 * Math.PI)
               ctx.fill()
             }
-            if (t === ICE) {
-              ctx.save()
-              ctx.beginPath()
-              ctx.rect(x, y, c, c)
-              ctx.clip()
-              ctx.strokeStyle = withAlpha(COLORS.darkgray, 0.4)
-              ctx.lineWidth = 1
-              ctx.beginPath()
-              for (let i = 0; i <= 8; i++) {
-                const o = (i * c) / 4 - c
-                ctx.moveTo(x + o, y + c)
-                ctx.lineTo(x + o + c, y)
-              }
-              ctx.stroke()
-              ctx.restore()
-            }
           }
         }
 
@@ -995,8 +969,7 @@
 
         // trail of the current episode; dashed for MC while its updates are still pending
         if (opt.trail && agent.trail.length > 1) {
-          ctx.strokeStyle = withAlpha(COLORS.dark, 0.5)
-          ctx.lineWidth = Math.max(1.5, c * 0.07)
+          const lw = Math.max(1.5, c * 0.07)
           ctx.lineCap = "round"
           ctx.lineJoin = "round"
           if (agent.kind === "mc" && !agent.pendingReset) ctx.setLineDash([c * 0.15, c * 0.15])
@@ -1006,6 +979,12 @@
           for (let i = 1; i < tr.length - 1; i++)
             ctx.lineTo((cx(tr[i]) + 0.5) * c, (cy(tr[i]) + 0.5) * c)
           ctx.lineTo(rx, ry)
+          // in the agent's color, over a thin light halo so it stays visible on the shaded cells
+          ctx.strokeStyle = withAlpha(COLORS.light, 0.8)
+          ctx.lineWidth = lw + 2
+          ctx.stroke()
+          ctx.strokeStyle = agent.kind === "mc" ? COLORS.mc : COLORS.secondary
+          ctx.lineWidth = lw
           ctx.stroke()
           ctx.setLineDash([])
         }
@@ -1055,7 +1034,7 @@
         const s = hover
         const where = `cell (${cx(s)}, ${cy(s)})`
         if (!isOpen(s)) {
-          readout.innerHTML = `<div>${where} · ${["empty", "wall", "lava", "ice", "goal"][map[s]]}</div><div>&nbsp;</div>`
+          readout.innerHTML = `<div>${where} · ${{ [WALL]: "wall", [LAVA]: "lava", [GOAL]: "goal" }[map[s]] || "empty"}</div><div>&nbsp;</div>`
           return
         }
         const part = (ag, name) =>
@@ -1239,7 +1218,7 @@
           return
         }
         if (s === start) return
-        const type = { wall: WALL, lava: LAVA, ice: ICE, goal: GOAL, erase: EMPTY }[t]
+        const type = { wall: WALL, lava: LAVA, goal: GOAL, erase: EMPTY }[t]
         if (map[s] === type) return
         map[s] = type
         mapChanged()
@@ -1294,7 +1273,7 @@
           map.fill(EMPTY)
           for (let s = 0; s < N; s++) {
             const u = Math.random()
-            map[s] = u < 0.16 ? WALL : u < 0.24 ? LAVA : u < 0.33 ? ICE : EMPTY
+            map[s] = u < 0.16 ? WALL : u < 0.24 ? LAVA : EMPTY
           }
           const st = (Math.random() * N) | 0
           const gl = (Math.random() * N) | 0
