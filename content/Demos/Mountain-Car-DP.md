@@ -8,7 +8,7 @@ draft: false
 
 An underpowered car sits in a valley and has to reach the flag on the hill to the right. Its engine is too weak to drive straight up, so it first has to rock back and forth to build up momentum. Both panels compute the optimal controller with dynamic programming: **value iteration (VI)** on the left and **policy iteration (PI)** on the right. The task is Example 10.1 from Sutton & Barto.
 
-The maps show the *state space* of the car, its position $x$ horizontally and its velocity $v$ vertically, with either the value of each state or the action of the policy (**push left**, **coast**, **push right**). The black line is the trajectory from the current start state under the current policy, and the car below replays it; the colored dot on the map shows the car's current state live, with the path it has driven so far. **Click** a map to fix the start state; the **random** button switches back to random starts.
+The maps show the *state space* of the car, its position $x$ horizontally and its velocity $v$ vertically, with either the value of each state or the action of the policy (**push left**, **coast**, **push right**). The black line is the trajectory from the current start state under the current policy, and the car below replays it; the colored dot on the map shows the car's current state live, with the path it has driven so far. **Click** a map to choose a different start state.
 
 ## Problem Setup
 
@@ -20,7 +20,7 @@ The maps show the *state space* of the car, its position $x$ horizontally and it
   $$
   where the velocity is clipped to its range and the car stops at the left wall. Each decision is held for four simulation steps.
 - **Reward and termination:** every decision costs $-1$, and reaching $x = 0.5$ ends the episode. So $-V(s)$ is roughly the number of decisions needed to reach the goal (slightly less because of the discount).
-- **Start:** as in the book, each episode starts at rest at a random position $x \in [-0.6, -0.4)$, marked by the short black bar on the maps. Both cars always start from the same state.
+- **Start:** the car starts at rest at the bottom of the valley, $(x, v) = (-0.5, 0)$.
 
 ## Method
 

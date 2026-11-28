@@ -337,8 +337,6 @@
         <span class="lbl" style="margin-left: 8px">Show:</span>
         <button id="vValue" aria-pressed="true">Value</button>
         <button id="vPolicy" aria-pressed="false">Policy</button>
-        <span class="lbl" style="margin-left: 8px">Start:</span>
-        <button id="randStart" aria-pressed="true">random x ∈ [−0.6, −0.4)</button>
       </div>
       <div class="grid">
         <label class="slider"
@@ -388,18 +386,10 @@
       const DEFAULTS = { n: 81, gamma: 0.99, force: 0.001, kIdx: 6, speed: 1.1 }
       const P = { ...DEFAULTS }
       const opt = { view: "value", traj: true }
-      // Start state of the cars. As in Sutton & Barto (Example 10.1), each episode starts at rest
-      // at a position drawn uniformly from [-0.6, -0.4), unless a start state was clicked on a map.
-      const START_LO = -0.6,
-        START_HI = -0.4
-      let fixedStart = null
+      // start state of the cars: at rest at the bottom of the valley, or the state clicked on a map
       let start = { x: -0.5, v: 0 }
-      function drawStart() {
-        start = fixedStart ? { ...fixedStart } : { x: START_LO + Math.random() * (START_HI - START_LO), v: 0 }
-      }
-      // both cars always start a new episode together from the same state, so they stay comparable
+      // both cars always start a new episode together, so they stay comparable
       function restartCars() {
-        drawStart()
         for (const c of cars) c.restart()
       }
 
@@ -691,10 +681,10 @@
             `<span><i class="sw" style="background:${withAlpha(COLORS.danger, 0.75)}"></i>push left</span>` +
             `<span><i class="sw" style="background:${withAlpha(COLORS.gray, 0.45)}"></i>coast</span>` +
             `<span><i class="sw" style="background:${withAlpha(COLORS.goal, 0.75)}"></i>push right</span>` +
-            `<span>· click the map to fix the start state</span>`
+            `<span>· click the map to set the start state</span>`
         else
           el.innerHTML =
-            `<span>darker = fewer decisions to the goal · click the map to fix the start state</span>`
+            `<span>darker = fewer decisions to the goal · click the map to set the start state</span>`
       }
 
       // ---------------------------------------------------------------------
@@ -815,16 +805,6 @@
           ctx.fill()
           ctx.stroke()
         }
-        // range the random start position is drawn from
-        if (!fixedStart) {
-          ctx.strokeStyle = COLORS.dark
-          ctx.lineWidth = 3
-          ctx.lineCap = "round"
-          ctx.beginPath()
-          ctx.moveTo(toX(p, START_LO), toY(p, 0))
-          ctx.lineTo(toX(p, START_HI), toY(p, 0))
-          ctx.stroke()
-        }
         // start marker
         ctx.fillStyle = COLORS.light
         ctx.strokeStyle = COLORS.dark
@@ -913,7 +893,6 @@
           }
         }
       }
-      drawStart()
       const cars = [new Car(VI), new Car(PI)]
       panels.forEach((p, i) => (p.car_ = cars[i]))
 
@@ -1177,8 +1156,9 @@
         p.hm.addEventListener("pointerdown", (ev) => {
           const s = stateAt(p, ev)
           if (!s) return
-          fixedStart = { x: Math.min(s.x, XMAX - 0.02), v: s.v }
-          setRandomStart(false)
+          start = { x: Math.min(s.x, XMAX - 0.02), v: s.v }
+          restartCars()
+          draw()
         })
       }
 
@@ -1252,15 +1232,6 @@
         buildLegend()
         draw()
       }
-      // random start (the book's setting) or the start state last clicked on a map
-      function setRandomStart(random) {
-        if (random) fixedStart = null
-        document.getElementById("randStart").setAttribute("aria-pressed", random)
-        buildLegend()
-        restartCars()
-        draw()
-      }
-      document.getElementById("randStart").addEventListener("click", () => setRandomStart(true))
       document.getElementById("vValue").addEventListener("click", () => setView("value"))
       document.getElementById("vPolicy").addEventListener("click", () => setView("policy"))
       document.getElementById("cTraj").addEventListener("change", (e) => {
