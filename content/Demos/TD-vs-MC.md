@@ -6,7 +6,7 @@ draft: false
 
 <iframe src="/static/demos/td-mc.html" title="TD vs. MC gridworld" style="width: 100%; height: 1150px; border: none;" loading="lazy"></iframe>
 
-Two robots learn to reach the goal in the same gridworld: the left one with **Monte Carlo (MC)** control and the right one with **temporal-difference (TD)** control (SARSA or Q-learning).
+Two robots learn to reach the goal in the same gridworld, which starts out as the classic *cliff walking* task (Sutton & Barto, Example 6.6): the left one with **Monte Carlo (MC)** control and the right one with **temporal-difference (TD)** control (SARSA or Q-learning).
 **Click and drag** on either map to paint walls, lava, ice, goals or the start cell with the selected tool (**right-click** erases), and watch how both agents adapt.
 
 Each cell is shaded by its estimated value $\max_a Q(s,a)$: darker means more valuable, and a small dot means that the cell has never been updated. The arrows show the greedy policy.
@@ -19,7 +19,7 @@ The plots show the return of each episode (dots, with a moving average), how oft
 
 The robot moves up, down, left or right. On **ice**, it slips to one of the two perpendicular directions with probability $0.5$ (the slip slider adds the same randomness everywhere). Walls and the border block movement.
 Every step costs $-0.02$. Reaching a **goal** gives $+1$ and stepping into **lava** gives $-1$, and both end the episode. Episodes are also cut off after 100 steps.
-Both agents explore with an $\varepsilon$-greedy policy and start from $Q = 0$.
+Both agents explore with an $\varepsilon$-greedy policy and start from $Q = 0$. By default every episode starts at **S**; with *exploring starts* it starts in a random open cell instead.
 
 ## Short Explanation
 
@@ -51,8 +51,8 @@ SARSA is *on-policy*: it learns the value of the $\varepsilon$-greedy policy it 
 
 ## Things to Try
 
-- **Turn off exploring starts.** Exploring starts launch every episode from a random cell, which is the standard trick that makes MC control work. Without them, MC easily gets stuck: as long as no update happens, its greedy policy can send the robot back and forth between two cells until the episode times out, so it may never see the goal. TD fixes such a loop within a few steps, because the Q-values it updates change the policy it follows mid-episode.
-- **Load the Cliff map** and compare SARSA with Q-learning. Q-learning learns the optimal path right along the lava, but it falls in now and then because of the $\varepsilon$-exploration; SARSA accounts for its own exploration and takes a safer detour. Compare the returns per episode.
+- **Turn on exploring starts.** Exploring starts launch every episode from a random cell, which is the standard trick that makes MC control work. Without them, MC easily gets stuck: as long as no update happens, its greedy policy can send the robot back and forth between two cells until the episode times out, so it may never see the goal. TD fixes such a loop within a few steps, because the Q-values it updates change the policy it follows mid-episode.
+- **Compare SARSA with Q-learning** on the cliff. Q-learning learns the optimal path right along the lava, but it falls in now and then because of the $\varepsilon$-exploration; SARSA accounts for its own exploration and takes a safer detour. Compare the returns per episode.
 - **Move the goal** (or paint a wall across the learned path) after the agents have converged, and see how quickly each one recovers.
 - **Increase the slip probability.** The returns become noisier, which hurts MC more than TD.
 - **Slow down** to a few steps per second and use **Step** to follow single updates.

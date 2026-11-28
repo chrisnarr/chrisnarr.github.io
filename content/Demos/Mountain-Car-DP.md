@@ -8,7 +8,7 @@ draft: false
 
 An underpowered car sits in a valley and has to reach the flag on the hill to the right. Its engine is too weak to drive straight up, so it first has to rock back and forth to build up momentum.
 Both panels compute the optimal controller with dynamic programming: **value iteration (VI)** on the left and **policy iteration (PI)** on the right. The maps show the *phase space* of the car, its position $x$ horizontally and its velocity $v$ vertically, with either the value of each state or the action of the policy (**push left**, **coast**, **push right**).
-**Click** a map to choose a start state. The black line is the trajectory from that state under the current policy, and the car below replays it.
+**Click** a map to choose a start state. The black line is the trajectory from that state under the current policy, and the car below replays it. The colored dot on the map shows the car's current state live, with the path it has driven so far.
 
 ## Setup
 

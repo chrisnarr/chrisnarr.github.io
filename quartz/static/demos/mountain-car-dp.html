@@ -20,8 +20,9 @@
         --tertiary: #64a0c8;
         --danger: #d1495b;
         --vi: #8e5cc4;
+        --pi: #e07020;
         --goal: #2e9e5b;
-        --flash: #f0a020;
+        --flash: #e6c229;
       }
       @media (prefers-color-scheme: dark) {
         :root:not([data-theme="light"]) {
@@ -34,8 +35,9 @@
           --tertiary: #0065bd;
           --danger: #e07a87;
           --vi: #b48ee0;
+          --pi: #f2994a;
           --goal: #5cc28a;
-          --flash: #f5b942;
+          --flash: #f2d45c;
         }
       }
       :root[data-theme="dark"] {
@@ -48,8 +50,9 @@
         --tertiary: #0065bd;
         --danger: #e07a87;
         --vi: #b48ee0;
+        --pi: #f2994a;
         --goal: #5cc28a;
-        --flash: #f5b942;
+        --flash: #f2d45c;
       }
       * {
         box-sizing: border-box;
@@ -132,7 +135,7 @@
         background: var(--vi);
       }
       .dot.pi {
-        background: var(--secondary);
+        background: var(--pi);
       }
       .sw {
         display: inline-block;
@@ -634,9 +637,9 @@
           COLORS[n] = v
           document.documentElement.style.setProperty("--" + n, v)
         }
-        for (const n of ["danger", "vi", "goal", "flash"]) COLORS[n] = own.getPropertyValue("--" + n).trim()
+        for (const n of ["danger", "vi", "pi", "goal", "flash"]) COLORS[n] = own.getPropertyValue("--" + n).trim()
         RGB = {}
-        for (const n of ["light", "secondary", "danger", "gray"]) RGB[n] = rgbOf(COLORS[n])
+        for (const n of ["light", "secondary", "danger", "goal", "gray"]) RGB[n] = rgbOf(COLORS[n])
         buildLegend()
         draw()
       }
@@ -672,7 +675,7 @@
           el.innerHTML =
             `<span><i class="sw" style="background:${withAlpha(COLORS.danger, 0.75)}"></i>push left</span>` +
             `<span><i class="sw" style="background:${withAlpha(COLORS.gray, 0.45)}"></i>coast</span>` +
-            `<span><i class="sw" style="background:${withAlpha(COLORS.secondary, 0.75)}"></i>push right</span>` +
+            `<span><i class="sw" style="background:${withAlpha(COLORS.goal, 0.75)}"></i>push right</span>` +
             `<span>· click the map to set the start state</span>`
         else
           el.innerHTML =
@@ -736,7 +739,7 @@
             let c
             if (opt.view === "policy") {
               const a = A.pi[s]
-              c = a === 1 ? mix(RGB.light, RGB.gray, 0.45) : mix(RGB.light, a === 0 ? RGB.danger : RGB.secondary, 0.75)
+              c = a === 1 ? mix(RGB.light, RGB.gray, 0.45) : mix(RGB.light, a === 0 ? RGB.danger : RGB.goal, 0.75)
             } else {
               const t = Math.min(1, Math.max(0, (A.V[s] - vlo) / -vlo))
               c = mix(RGB.light, RGB.secondary, 0.06 + 0.88 * t)
@@ -774,7 +777,29 @@
           r.pts.forEach(([x, v], k) => (k ? ctx.lineTo(toX(p, x), toY(p, v)) : ctx.moveTo(toX(p, x), toY(p, v))))
           ctx.stroke()
         }
+        // live state of the car below: the path it has driven so far and where it is now
+        const car = p.car_
+        if (car && car.path.length) {
+          const col = A === VI ? COLORS.vi : COLORS.pi
+          ctx.strokeStyle = col
+          ctx.lineWidth = 3
+          ctx.lineJoin = "round"
+          ctx.lineCap = "round"
+          ctx.beginPath()
+          car.path.forEach(([x, v], k) => (k ? ctx.lineTo(toX(p, x), toY(p, v)) : ctx.moveTo(toX(p, x), toY(p, v))))
+          ctx.lineTo(toX(p, Math.min(car.x, XMAX)), toY(p, car.v))
+          ctx.stroke()
+        }
         ctx.restore()
+        if (car) {
+          ctx.fillStyle = A === VI ? COLORS.vi : COLORS.pi
+          ctx.strokeStyle = COLORS.light
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.arc(toX(p, Math.min(car.x, XMAX)), toY(p, car.v), 6, 0, 2 * Math.PI)
+          ctx.fill()
+          ctx.stroke()
+        }
         // start marker
         ctx.fillStyle = COLORS.light
         ctx.strokeStyle = COLORS.dark
@@ -785,7 +810,7 @@
         ctx.stroke()
         // goal edge
         ctx.fillStyle = COLORS.goal
-        ctx.fillRect(HM.L + p.pw - 2, HM.T, 3, p.ph)
+        ctx.fillRect(HM.L + p.pw - 5, HM.T, 6, p.ph)
         // axes
         ctx.strokeStyle = COLORS.lightgray
         ctx.lineWidth = 1
@@ -833,6 +858,7 @@
           this.d = 0
           this.wait = 0
           this.done = false
+          this.path = [[this.x, this.v]]
         }
         advance(dt) {
           if (!NG) return
@@ -853,6 +879,7 @@
               this.v = 0
             }
             this.k = (this.k + 1) % REPEAT
+            this.path.push([Math.min(this.x, XMAX), this.v])
             if (this.k === 0) this.d++
             if (this.x >= XMAX || this.d >= MAX_DECISIONS) {
               this.done = true
@@ -863,6 +890,7 @@
         }
       }
       const cars = [new Car(VI), new Car(PI)]
+      panels.forEach((p, i) => (p.car_ = cars[i]))
 
       function drawCar(p, car) {
         const { cctx: ctx, w } = p
@@ -903,7 +931,7 @@
         ctx.save()
         ctx.translate(X(x), Y(x))
         ctx.rotate(slope)
-        ctx.fillStyle = p.A === VI ? COLORS.vi : COLORS.secondary
+        ctx.fillStyle = p.A === VI ? COLORS.vi : COLORS.pi
         ctx.fillRect(-11, -11, 22, 9)
         ctx.fillStyle = COLORS.dark
         for (const wx of [-6, 6]) {
@@ -912,7 +940,7 @@
           ctx.fill()
         }
         if (car.a && !car.done) {
-          ctx.strokeStyle = car.a < 0 ? COLORS.danger : COLORS.secondary
+          ctx.strokeStyle = car.a < 0 ? COLORS.danger : COLORS.goal
           ctx.lineWidth = 2
           const d = car.a
           ctx.beginPath()
@@ -1052,7 +1080,7 @@
         ctx.rect(L, T - 2, w - L - R, h - T - B + 4)
         ctx.clip()
         if (marks) {
-          ctx.strokeStyle = withAlpha(COLORS.secondary, 0.6)
+          ctx.strokeStyle = withAlpha(COLORS.pi, 0.6)
           ctx.lineWidth = 1.5
           ctx.beginPath()
           for (const m of marks) {
@@ -1078,7 +1106,7 @@
           plots.err,
           [
             { pts: VI.err.pts, color: COLORS.vi },
-            { pts: PI.err.pts, color: COLORS.secondary },
+            { pts: PI.err.pts, color: COLORS.pi },
           ],
           { log: true, marks: PI.improvements },
         )
@@ -1086,7 +1114,7 @@
           plots.steps,
           [
             { pts: VI.steps.pts, color: COLORS.vi },
-            { pts: PI.steps.pts, color: COLORS.secondary },
+            { pts: PI.steps.pts, color: COLORS.pi },
           ],
           { marks: PI.improvements, yMax: MAX_DECISIONS },
         )
@@ -1231,7 +1259,8 @@
         }
         for (const c of cars) c.advance(dt)
         if (PI.changed) for (let s = 0; s < NG; s++) PI.changed[s] *= Math.exp(-dt / 1.2)
-        if (ticked || opt.view === "policy") draw()
+        if (ticked) draw()
+        else if (COLORS.light && Vstar) for (const p of panels) drawMap(p)
         drawCars()
         requestAnimationFrame(frame)
       }

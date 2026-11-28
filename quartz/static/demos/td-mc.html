@@ -112,7 +112,13 @@
         line-height: 1.5;
         margin-top: 4px;
         color: var(--darkgray);
-        min-height: 3em;
+        height: 4.5em;
+      }
+      .status div,
+      #readout div {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .status b {
         font-weight: 400;
@@ -137,7 +143,8 @@
         font-size: 12px;
         color: var(--darkgray);
         margin: 6px 0 0;
-        min-height: 1.5em;
+        line-height: 1.5;
+        height: 3em;
       }
       .bar {
         display: flex;
@@ -381,7 +388,6 @@
       </div>
       <div class="bar">
         <span class="lbl">Map:</span>
-        <button id="mapRooms">Rooms</button>
         <button id="mapCliff">Cliff</button>
         <button id="randMap">Random</button>
         <button id="clearMap">Clear</button>
@@ -390,6 +396,11 @@
         <span class="lbl">TD method:</span>
         <button id="mSarsa" aria-pressed="true">SARSA</button>
         <button id="mQ" aria-pressed="false">Q-learning</button>
+      </div>
+      <div class="bar">
+        <span class="lbl">Initial state:</span>
+        <button id="stFixed" aria-pressed="true">at S</button>
+        <button id="stRandom" aria-pressed="false">in a random cell (exploring starts)</button>
       </div>
 
       <div class="grid">
@@ -415,7 +426,6 @@
         /></label>
       </div>
       <div class="toggles">
-        <label><input type="checkbox" id="cRandom" checked /> Exploring starts (random start cell)</label>
         <label><input type="checkbox" id="cValues" checked /> Show values</label>
         <label><input type="checkbox" id="cPolicy" checked /> Show greedy policy</label>
         <label><input type="checkbox" id="cFlash" checked /> Highlight updates</label>
@@ -452,7 +462,7 @@
       const DEFAULTS = { alpha: 0.1, eps: 0.1, gamma: 0.95, slip: 0, speed: 2.3 }
       const P = { ...DEFAULTS }
       let tdMethod = "sarsa"
-      const opt = { values: true, policy: true, flash: true, trail: true, randomStarts: true }
+      const opt = { values: true, policy: true, flash: true, trail: true, randomStarts: false }
 
       const map = new Uint8Array(N)
       let start = 0
@@ -460,34 +470,11 @@
       const cx = (s) => s % COLS
       const cy = (s) => (s / COLS) | 0
 
-      // default: two rooms joined by a door, a lava pool, a lava strip and an ice patch
-      function roomsMap() {
-        map.fill(EMPTY)
-        for (const y of [0, 1, 2, 4, 5, 6]) map[idx(4, y)] = WALL
-        for (const y of [3, 4, 5]) map[idx(9, y)] = WALL
-        for (const [x, y] of [
-          [7, 1],
-          [8, 1],
-          [7, 2],
-          [8, 2],
-          [6, 5],
-          [6, 6],
-        ])
-          map[idx(x, y)] = LAVA
-        for (const [x, y] of [
-          [1, 3],
-          [2, 3],
-          [1, 4],
-          [2, 4],
-        ])
-          map[idx(x, y)] = ICE
-        map[idx(11, 6)] = GOAL
-        start = idx(0, 6)
-      }
-
-      // cliff walking: the shortest path runs right along the lava
+      // cliff walking (Sutton & Barto, Example 6.6): the top rows are walled off so that
+      // the open area is the original 12 x 4 grid; the shortest path runs right along the lava
       function cliffMap() {
         map.fill(EMPTY)
+        for (let y = 0; y < ROWS - 4; y++) for (let x = 0; x < COLS; x++) map[idx(x, y)] = WALL
         for (let x = 1; x <= 10; x++) map[idx(x, 6)] = LAVA
         map[idx(11, 6)] = GOAL
         start = idx(0, 6)
@@ -1043,7 +1030,7 @@
           let line2
           if (ag.kind === "mc") {
             line2 = ag.pendingReset
-              ? `<b>episode over: updated ${ag.lastUpdated} Q-values towards the return G</b>`
+              ? `<b>episode over: updated ${ag.lastUpdated} Q-values towards G</b>`
               : `<b>${ag.traj.length / 3} visits waiting for the episode to end</b>`
           } else {
             line2 =
@@ -1051,28 +1038,29 @@
                 ? "<b>no updates yet</b>"
                 : `<b>updates Q(s,a) every step · last δ = ${fmt(ag.lastDelta, 2)}</b>`
           }
+          // three fixed, non-wrapping lines so the panel height never changes
           p.st.innerHTML =
-            `episode ${ag.episodes + (ag.pendingReset ? 0 : 1)} · step ${ag.t}/${MAX_STEPS}` +
-            ` · last return ${fmt(ag.lastReturn, 2)} · goal ${rate}<br>` +
-            line2
+            `<div>episode ${ag.episodes + (ag.pendingReset ? 0 : 1)} · step ${ag.t}/${MAX_STEPS}</div>` +
+            `<div>last return ${fmt(ag.lastReturn, 2)} · reached goal ${rate}</div>` +
+            `<div>${line2}</div>`
         }
       }
 
       const readout = document.getElementById("readout")
       function updateReadout() {
         if (hover < 0) {
-          readout.textContent = "Hover over a cell to compare the estimates with V*."
+          readout.innerHTML = "<div>Hover over a cell to compare the estimates with V*.</div><div>&nbsp;</div>"
           return
         }
         const s = hover
         const where = `cell (${cx(s)}, ${cy(s)})`
         if (!isOpen(s)) {
-          readout.textContent = `${where} · ${["empty", "wall", "lava", "ice", "goal"][map[s]]}`
+          readout.innerHTML = `<div>${where} · ${["empty", "wall", "lava", "ice", "goal"][map[s]]}</div><div>&nbsp;</div>`
           return
         }
         const part = (ag, name) =>
           `${name} ${ag.visits[s] ? fmt(ag.maxQ(s), 2) : "unvisited"} (${ag.visits[s]} updates)`
-        readout.textContent = `${where} · V* ${fmt(Vstar[s], 2)} · ${part(mc, "MC")} · ${part(td, "TD")}`
+        readout.innerHTML = `<div>${where} · V* ${fmt(Vstar[s], 2)}</div><div>${part(mc, "MC")} · ${part(td, "TD")}</div>`
       }
 
       // ---------------------------------------------------------------------
@@ -1332,7 +1320,7 @@
             return
           }
         }
-        roomsMap()
+        cliffMap()
       }
 
       // ---------------------------------------------------------------------
@@ -1382,7 +1370,6 @@
         for (const ag of agents) ag.reset()
         draw()
       }
-      document.getElementById("mapRooms").addEventListener("click", () => loadMap(roomsMap))
       document.getElementById("mapCliff").addEventListener("click", () => loadMap(cliffMap))
       document.getElementById("clearMap").addEventListener("click", () => {
         for (let s = 0; s < N; s++) if (map[s] !== GOAL) map[s] = EMPTY
@@ -1404,6 +1391,13 @@
           m === "sarsa" ? "TD: SARSA" : "TD: Q-learning"
         td.a = td.policy(td.s)
       }
+      function setStarts(random) {
+        opt.randomStarts = random
+        document.getElementById("stFixed").setAttribute("aria-pressed", !random)
+        document.getElementById("stRandom").setAttribute("aria-pressed", random)
+      }
+      document.getElementById("stFixed").addEventListener("click", () => setStarts(false))
+      document.getElementById("stRandom").addEventListener("click", () => setStarts(true))
       document.getElementById("mSarsa").addEventListener("click", () => setMethod("sarsa"))
       document.getElementById("mQ").addEventListener("click", () => setMethod("q"))
 
@@ -1412,7 +1406,6 @@
         ["cPolicy", "policy"],
         ["cFlash", "flash"],
         ["cTrail", "trail"],
-        ["cRandom", "randomStarts"],
       ]) {
         document.getElementById(id).addEventListener("change", (e) => {
           opt[key] = e.target.checked
@@ -1456,7 +1449,7 @@
         requestAnimationFrame(frame)
       }
 
-      roomsMap()
+      cliffMap()
       computeVstar()
       for (const ag of agents) ag.reset()
       syncSliders()
