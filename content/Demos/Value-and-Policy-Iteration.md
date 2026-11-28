@@ -66,5 +66,3 @@ PI stops when an improvement step doesn't change any action. It typically needs 
 - **Slip probability:** the chance of moving sideways instead of in the chosen direction.
 - **PI evaluation sweeps per improvement:** how many evaluation sweeps PI performs before each improvement ("until converged" is classic policy iteration).
 - **Speed:** sweeps per second; pause and use **Step** to go through single sweeps.
-
-See also the [[TD-vs-MC|gridworld demo for TD and Monte Carlo learning]], where the agents have to learn the same kind of task without knowing the model.

@@ -56,5 +56,3 @@ Here it needs only four improvements, $\pi_0 \to \pi_4$, just like in the book, 
 - **Discount $\gamma$:** how much tomorrow's earnings count.
 - **PI evaluation sweeps per improvement:** how many evaluation sweeps PI performs before each improvement.
 - **Speed:** sweeps per second.
-
-See also [[Value-and-Policy-Iteration|value and policy iteration in a gridworld]].

@@ -53,5 +53,3 @@ $$
 - **Probability of heads $p_h$:** the chance of winning a single bet.
 - **Goal:** the capital needed to win.
 - **Speed:** VI sweeps (and PI steps) per second; each PI step is either an exact evaluation or an improvement.
-
-See also [[Value-and-Policy-Iteration|value and policy iteration in a gridworld]].

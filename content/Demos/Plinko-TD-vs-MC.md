@@ -61,5 +61,3 @@ They only differ in what that target is.
 - **Initial estimate $V_0$:** the starting value of every peg. TD's bias at the beginning comes entirely from this guess.
 - **Rows:** the depth of the board (this resets the learners).
 - **Speed:** how many rows per second the ball falls; slow it down and use **Step** to follow single updates.
-
-See also the [[TD-vs-MC|gridworld demo]], which compares MC and TD for *control*.

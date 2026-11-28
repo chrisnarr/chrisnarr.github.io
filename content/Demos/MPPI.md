@@ -12,13 +12,15 @@ The thin lines are the sampled rollouts (darker means a higher weight, red means
 
 ## Problem Setup
 
-The robot is modelled as a unicycle,
+The robot is modelled as a discrete-time unicycle,
 
 $$
-\dot p_x = v \cos\theta, \qquad \dot p_y = v \sin\theta, \qquad \dot\theta = \omega ,
+p_{x,k+1} = p_{x,k} + \Delta t\, v_k \cos\theta_k, \qquad
+p_{y,k+1} = p_{y,k} + \Delta t\, v_k \sin\theta_k, \qquad
+\theta_{k+1} = \theta_k + \Delta t\, \omega_k ,
 $$
 
-where the state $x = [p_x, p_y, \theta]^\top$ consists of the position $p = (p_x, p_y)$ and the heading angle $\theta$, and the input $u = [v, \omega]^\top$ consists of the linear velocity $v \in [-0.6, 1.6]$ m/s and the angular velocity $\omega \in [-2.5, 2.5]$ rad/s. The dynamics are integrated with a control period of $0.05$ s.
+where the state $x_k = [p_{x,k}, p_{y,k}, \theta_k]^\top$ consists of the position $p_k = (p_{x,k}, p_{y,k})$ and the heading angle $\theta_k$, the input $u_k = [v_k, \omega_k]^\top$ consists of the linear velocity $v_k \in [-0.6, 1.6]$ m/s and the angular velocity $\omega_k \in [-2.5, 2.5]$ rad/s, and $\Delta t = 0.05$ s is the control period. The same model is used for the simulated robot and inside the controller, so there is no model mismatch.
 
 The robot is a disc with a radius of $0.22$ m and drives in a $12 \times 8$ m arena with circular obstacles, none of which it may touch, just like the border of the arena. Its task is to reach the target, which counts as reached within $0.25$ m.
 
@@ -56,5 +58,3 @@ Here, the stage cost $\ell$ consists of the distance to the target, small penalt
 - **Temperature $\lambda$:** small values make the update follow only the best few samples, large values average over everything and make the robot sluggish.
 - **Noise $\sigma_v, \sigma_\omega$:** the noise is added to the input sequence; too little noise and the trajectories are only updated very slowly; too much and the plan gets very jittery.
 - **Obstacle weight:** the weight of the soft penalty in the safety band around each obstacle.
-
-See also the [[Mountain-Car-DP|mountain car demo]], which computes a controller offline with dynamic programming instead.

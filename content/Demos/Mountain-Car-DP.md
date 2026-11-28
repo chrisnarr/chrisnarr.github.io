@@ -56,5 +56,3 @@ It needs only a handful of policies (seven with the defaults), but the first eva
 - **Engine force $F$:** the acceleration of the engine; the default $0.001$ is the classic setting.
 - **PI evaluation sweeps per improvement:** how many evaluation sweeps PI performs before each improvement.
 - **Speed:** sweeps per second.
-
-See also [[Value-and-Policy-Iteration|value and policy iteration in a gridworld]], and the [[MPPI|MPPI demo]] for a sampling-based controller that plans online instead.
