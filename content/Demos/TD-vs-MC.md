@@ -12,12 +12,19 @@ Each cell is shaded by its estimated value $\max_a Q(s,a)$: darker means more va
 
 ## Problem Setup
 
-- **State:** the cell the robot is in.
-- **Action:** move up, down, left or right.
-- **Dynamics:** with the slip probability (0 by default), the robot slips to one of the two perpendicular directions instead. Walls and the border block movement.
-- **Reward and termination:** every step costs $-0.02$. Reaching a **goal** gives $+1$ and stepping into **lava** gives $-1$, and both end the episode. Episodes are also cut off after 100 steps.
-- **Start:** by default every episode starts at **S**; with *exploring starts* it starts in a random open cell instead.
-- **Objective:** maximise the expected discounted return. Unlike in dynamic programming, the agents don't know the model and have to learn from their own experience.
+The robot moves through a gridworld according to
+
+$$
+s_{k+1} =
+\begin{cases}
+\text{next}(s_k, a_k) & \text{with probability } 1 - p, \\
+\text{next}(s_k, a_k^\perp) & \text{with probability } p/2 \text{ each},
+\end{cases}
+$$
+
+where the state $s_k$ is the cell the robot is in, the action $a_k$ is one of the four directions up, down, left and right, $a_k^\perp$ is either of the two directions perpendicular to it, and $\text{next}(s, a)$ is the neighbouring cell in direction $a$, or $s$ itself if a wall or the border blocks the way. The slip probability $p$ is $0$ by default.
+
+Every step costs $-0.02$. Reaching a **goal** gives $+1$ and stepping into **lava** gives $-1$, and both end the episode; episodes are also cut off after 100 steps. By default every episode starts at **S**; with *exploring starts* it starts in a random open cell instead. The objective is to maximise the expected discounted return, but unlike in dynamic programming, the agents don't know the transition probabilities and have to learn from their own experience.
 
 ## Method
 

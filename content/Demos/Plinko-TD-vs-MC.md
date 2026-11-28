@@ -12,14 +12,25 @@ Pegs are shaded by their estimated value (or by their error, if you switch that 
 
 ## Problem Setup
 
-- **State:** the peg the ball is at. There are no actions, so this is a pure *prediction* problem on a Markov chain.
-- **Dynamics:** at every peg $s$ the ball bounces left with probability $p_s$ (0.5 for a fair peg) and right otherwise, down to the next row.
-- **Reward and termination:** the ball lands in a slot below the last row, which pays its payoff $G$ and ends the episode.
-- **Objective:** estimate the value of every peg,
-  $$
-  V(s) = \mathbb{E}[\,G \mid s\,],
-  $$
-  the payoff a ball starting there can expect to win. The true values follow from a single backward pass from the slots, $V(s) = p_s\, V(s_\text{left}) + (1 - p_s)\, V(s_\text{right})$.
+The ball falls through the board according to
+
+$$
+s_{k+1} =
+\begin{cases}
+s_k^\text{left} & \text{with probability } p_{s_k}, \\
+s_k^\text{right} & \text{with probability } 1 - p_{s_k},
+\end{cases}
+$$
+
+where the state $s_k$ is the peg the ball is at, $s^\text{left}$ and $s^\text{right}$ are the two pegs (or slots) below it, and $p_s$ is the probability of bouncing left, $0.5$ for a fair peg. There are no actions, so this is a pure *prediction* problem on a Markov chain.
+
+Below the last row, the ball lands in a slot, which pays its payoff $G$ and ends the episode. The objective is to estimate the value of every peg,
+
+$$
+V(s) = \mathbb{E}[\,G \mid s\,],
+$$
+
+the payoff a ball starting there can expect to win. The true values follow from a single backward pass from the slots, $V(s) = p_s\, V(s^\text{left}) + (1 - p_s)\, V(s^\text{right})$.
 
 ## Method
 

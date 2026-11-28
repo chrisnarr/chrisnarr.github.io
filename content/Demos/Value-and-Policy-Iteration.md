@@ -12,11 +12,19 @@ Cells show their current value (blue for positive, red for negative) and the cur
 
 ## Problem Setup
 
-- **State:** the cell the robot is in.
-- **Action:** move up, down, left or right.
-- **Dynamics:** with the slip probability, the robot moves to one of the two perpendicular directions instead (on ice with at least $0.5$). Walls and the border block movement.
-- **Reward and termination:** entering a **goal** gives $+1$ and entering **lava** gives $-1$, and both end the episode. Every other step gives the step reward.
-- **Objective:** maximise the expected discounted return. Because the model $p(s' \mid s, a)$ and the rewards are known, no interaction with the environment is needed; everything is computed from the Bellman equations.
+The robot moves through a gridworld according to
+
+$$
+s_{k+1} =
+\begin{cases}
+\text{next}(s_k, a_k) & \text{with probability } 1 - p, \\
+\text{next}(s_k, a_k^\perp) & \text{with probability } p/2 \text{ each},
+\end{cases}
+$$
+
+where the state $s_k$ is the cell the robot is in, the action $a_k$ is one of the four directions up, down, left and right, $a_k^\perp$ is either of the two directions perpendicular to it, and $\text{next}(s, a)$ is the neighbouring cell in direction $a$, or $s$ itself if a wall or the border blocks the way. The slip probability $p$ is set with the slider, and on ice it is at least $0.5$.
+
+Entering a **goal** gives a reward of $+1$ and entering **lava** gives $-1$, and both end the episode. Every other step gives the step reward. The objective is to maximise the expected discounted return. Because the transition probabilities $p(s' \mid s, a)$ and the rewards are known, no interaction with the environment is needed; everything is computed from the Bellman equations.
 
 ## Method
 

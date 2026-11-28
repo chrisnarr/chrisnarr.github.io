@@ -12,15 +12,15 @@ The maps show the *state space* of the car, its position $x$ horizontally and it
 
 ## Problem Setup
 
-- **State:** the position $x \in [-1.2, 0.5]$ and velocity $v \in [-0.07, 0.07]$ of the car.
-- **Action:** push left, coast or push right, $a \in \{-1, 0, +1\}$.
-- **Dynamics:** the classic mountain car dynamics (Moore, 1990),
-  $$
-  v_{k+1} = v_k + F\, a_k - 0.0025 \cos(3 x_k), \qquad x_{k+1} = x_k + v_{k+1},
-  $$
-  where the velocity is clipped to its range and the car stops at the left wall. Each decision is held for four simulation steps.
-- **Reward and termination:** every decision costs $-1$, and reaching $x = 0.5$ ends the episode. So $-V(s)$ is roughly the number of decisions needed to reach the goal (slightly less because of the discount).
-- **Start:** the car starts at rest at the bottom of the valley, $(x, v) = (-0.5, 0)$.
+The car follows the classic mountain car dynamics (Moore, 1990),
+
+$$
+v_{k+1} = v_k + F\, a_k - 0.0025 \cos(3 x_k), \qquad x_{k+1} = x_k + v_{k+1},
+$$
+
+where the state consists of the position $x_k \in [-1.2, 0.5]$ and the velocity $v_k \in [-0.07, 0.07]$ of the car, and the input $a_k \in \{-1, 0, +1\}$ pushes left, coasts or pushes right with the engine force $F$. The velocity is clipped to its range, the car stops at the left wall, and each decision is held for four simulation steps.
+
+Every decision costs $-1$, and reaching $x = 0.5$ ends the episode, so $-V(s)$ is roughly the number of decisions needed to reach the goal (slightly less because of the discount). The car starts at rest at the bottom of the valley, $(x, v) = (-0.5, 0)$.
 
 ## Method
 

@@ -12,13 +12,15 @@ Each cell of a heatmap is an evening state (cars at A upwards, cars at B to the 
 
 ## Problem Setup
 
-- **State:** the number of cars at locations A and B in the evening, each between 0 and 20, so there are $21 \times 21$ states.
-- **Action:** the number of cars $a \in \{-5, \dots, 5\}$ moved overnight from A to B (negative: from B to A).
-- **Dynamics:** during the next day, rental requests and returns arrive at random at both locations. Both are Poisson distributed, with means 3 and 4 for requests and 3 and 2 for returns at A and B. A request can only be served if a car is available, and cars beyond 20 at a location are lost.
-- **Reward:** $+\$10$ for every rented car and $-\$2$ for every moved car.
-- **Objective:** maximise the expected discounted earnings, with $\gamma = 0.9$.
+The number of cars at each location evolves as
 
-Because the two locations only interact through the cars that are moved, the expectation over the next state factorises, which makes a full sweep over all states and actions cheap.
+$$
+n_{k+1} = \min\big(\tilde n_k - \min(q_k, \tilde n_k) + r_k,\ 20\big), \qquad \tilde n_{A,k} = \min(n_{A,k} - a_k, 20), \quad \tilde n_{B,k} = \min(n_{B,k} + a_k, 20),
+$$
+
+for each location $A$ and $B$ separately, where the state $(n_{A,k}, n_{B,k}) \in \{0, \dots, 20\}^2$ is the number of cars at the two locations in the evening, the action $a_k \in \{-5, \dots, 5\}$ is the number of cars moved overnight from A to B (negative: from B to A), and $\tilde n_k$ is the number of cars in the morning. During the day, $q_k$ rental requests and $r_k$ returns arrive at each location; they are Poisson distributed with means 3 and 4 for the requests and 3 and 2 for the returns at A and B. A request can only be served if a car is available, and cars beyond 20 at a location are lost.
+
+Every rented car earns $\$10$ and every moved car costs $\$2$, so the reward is $10 \cdot \min(q_k, \tilde n_k)$, summed over both locations, minus $2|a_k|$. The objective is to maximise the expected discounted earnings, with $\gamma = 0.9$. Because the two locations only interact through the cars that are moved, the expectation over the next state factorises, which makes a full sweep over all $21 \times 21$ states and 11 actions cheap.
 
 ## Method
 

@@ -12,15 +12,15 @@ The thin lines are the sampled rollouts (darker means a higher weight, red means
 
 ## Problem Setup
 
-- **State:** $x = [p_x, p_y, \theta]^\top$, the position $p = (p_x, p_y)$ of the robot and its heading angle $\theta$.
-- **Input:** $u = [v, \omega]^\top$, the linear velocity $v \in [-0.6, 1.6]$ m/s and the angular velocity $|\omega| \le 2.5$ rad/s.
-- **Dynamics:** a unicycle,
-  $$
-  \dot p_x = v \cos\theta, \qquad \dot p_y = v \sin\theta, \qquad \dot\theta = \omega ,
-  $$
-  integrated with a control period of $0.05$ s.
-- **Environment:** a $12 \times 8$ m arena with circular obstacles. The robot is a disc with a radius of $0.22$ m, and it must not touch an obstacle or the border.
-- **Goal:** reach the target, which counts as reached within $0.25$ m.
+The robot is modelled as a unicycle,
+
+$$
+\dot p_x = v \cos\theta, \qquad \dot p_y = v \sin\theta, \qquad \dot\theta = \omega ,
+$$
+
+where the state $x = [p_x, p_y, \theta]^\top$ consists of the position $p = (p_x, p_y)$ and the heading angle $\theta$, and the input $u = [v, \omega]^\top$ consists of the linear velocity $v \in [-0.6, 1.6]$ m/s and the angular velocity $\omega \in [-2.5, 2.5]$ rad/s. The dynamics are integrated with a control period of $0.05$ s.
+
+The robot is a disc with a radius of $0.22$ m and drives in a $12 \times 8$ m arena with circular obstacles, none of which it may touch, just like the border of the arena. Its task is to reach the target, which counts as reached within $0.25$ m.
 
 ## Method
 
