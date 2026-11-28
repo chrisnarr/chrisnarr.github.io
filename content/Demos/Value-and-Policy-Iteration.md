@@ -6,22 +6,21 @@ draft: true
 
 <iframe src="/static/demos/vi-pi.html" title="Value and policy iteration" style="width: 100%; height: 1150px; border: none;" loading="lazy"></iframe>
 
-Both panels solve the same gridworld, whose dynamics are fully known, by dynamic programming: **value iteration (VI)** on the left and **policy iteration (PI)** on the right.
-Every tick performs one sweep over all cells, so the horizontal axes of the plots measure the work in sweeps. The small blue ticks mark PI's policy improvements.
+Both panels solve the same gridworld, whose model is fully known, by dynamic programming: **value iteration (VI)** on the left and **policy iteration (PI)** on the right. Every tick performs one sweep over all cells, so the horizontal axes of the plots measure the work in sweeps. The small blue ticks mark PI's policy improvements.
 
-Cells show their current value (blue for positive, red for negative) and the current policy: the greedy policy for VI, and the policy $\pi$ being evaluated for PI. A red arrow is an action that is not optimal.
-Highlighted cells changed their value in the last sweep, and outlined cells changed their action in PI's last improvement step.
-**Click and drag** to paint walls, lava, ice or goals (**right-click** erases); both methods continue from their current values, so you can watch them adapt. Hover over a cell to see its one-step lookahead $Q(s,a)$ for both.
+Cells show their current value (blue for positive, red for negative) and the current policy: the greedy policy for VI, and the policy $\pi$ being evaluated for PI. A red arrow is an action that is not optimal. Highlighted cells changed their value in the last sweep, and outlined cells changed their action in PI's last improvement step. **Click and drag** to paint walls, lava, ice or goals (**right-click** erases); both methods continue from their current values, so you can watch them adapt. Hover over a cell to see its one-step lookahead $Q(s,a)$ for both.
 
-## Setup
+## Problem Setup
 
-The robot moves up, down, left or right, and with the slip probability it moves to one of the two perpendicular directions instead (on ice with at least $0.5$). Walls and the border block movement.
-Entering a **goal** gives $+1$, entering **lava** gives $-1$ (both end the episode), and every other step gives the step reward.
-Because the model $p(s' \mid s, a)$ and the rewards are known, no interaction with the environment is needed; everything is computed from the Bellman equations.
+- **State:** the cell the robot is in.
+- **Action:** move up, down, left or right.
+- **Dynamics:** with the slip probability, the robot moves to one of the two perpendicular directions instead (on ice with at least $0.5$). Walls and the border block movement.
+- **Reward and termination:** entering a **goal** gives $+1$ and entering **lava** gives $-1$, and both end the episode. Every other step gives the step reward.
+- **Objective:** maximise the expected discounted return. Because the model $p(s' \mid s, a)$ and the rewards are known, no interaction with the environment is needed; everything is computed from the Bellman equations.
 
-## Short Explanation
+## Method
 
-Both methods are built on the one-step lookahead
+Both methods use the one-step lookahead
 
 $$
 Q_V(s, a) = \sum_{s'} p(s' \mid s, a) \big[ r(s') + \gamma V(s') \big],

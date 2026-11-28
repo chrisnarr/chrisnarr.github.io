@@ -6,15 +6,21 @@ draft: true
 
 <iframe src="/static/demos/gambler.html" title="Gambler's problem" style="width: 100%; height: 760px; border: none;" loading="lazy"></iframe>
 
-A gambler with capital $s$ bets on a sequence of coin flips. If the coin comes up heads (probability $p_h$), they win their stake; otherwise they lose it. The game ends when they reach the goal (100 by default), which pays a reward of $1$, or when they go broke. So the value $V(s)$ is simply the probability of winning from capital $s$.
-The left column solves the problem with **value iteration (VI)** and the right one with **policy iteration (PI)**. The top plots show the values, with fading lines for the earlier sweeps or policies and the dashed line for the optimal $V^*$. The bottom plots show the stakes, with grey dots for **all** optimal stakes.
-Hover over a plot to read off the numbers for a single capital.
+How much should a gambler bet on each coin flip to maximise the chance of reaching a goal? The left column solves the problem with **value iteration (VI)** and the right one with **policy iteration (PI)**. This is Example 4.3 from Sutton & Barto.
 
-This is Example 4.3 from Sutton & Barto.
+The top plots show the values, with fading lines for the earlier sweeps or policies and the dashed line for the optimal $V^*$. The bottom plots show the stakes, with grey dots for **all** optimal stakes. Hover over a plot to read off the numbers for a single capital.
 
-## Short Explanation
+## Problem Setup
 
-The state is the capital $s \in \{1, \dots, G-1\}$, the action is the stake $a \in \{1, \dots, \min(s, G - s)\}$, and there is no discounting:
+- **State:** the gambler's capital $s \in \{1, \dots, G-1\}$, where $G$ is the goal (100 by default).
+- **Action:** the stake $a \in \{1, \dots, \min(s, G - s)\}$.
+- **Dynamics:** with probability $p_h$ the coin comes up heads and the gambler wins the stake, $s \to s + a$; otherwise they lose it, $s \to s - a$.
+- **Reward and termination:** reaching the goal gives a reward of $1$ and going broke gives $0$; both end the game. There is no discounting.
+- **Objective:** with these rewards, the value $V(s)$ is simply the probability of reaching the goal from capital $s$, and the optimal policy maximises it.
+
+## Method
+
+Both methods use the one-step lookahead
 
 $$
 Q_V(s, a) = p_h\, V(s + a) + (1 - p_h)\, V(s - a), \qquad V(0) = 0, \quad V(G) = 1 .
@@ -22,7 +28,10 @@ $$
 
 **Value iteration** sweeps through the capitals and sets $V(s) \leftarrow \max_a Q_V(s, a)$ in place, until the largest change is below $10^{-10}$. The greedy stake is the *smallest* stake that achieves the maximum.
 
-**Policy iteration** starts from the timid policy "always bet 1". It evaluates each policy *exactly*, by solving the linear system $V(s) = Q_V(s, \pi(s))$ for all $s$ at once. Then it makes the policy greedy, and changes a stake only if that strictly improves the value.
+**Policy iteration** starts from the timid policy "always bet 1" and alternates two steps:
+
+1. **Policy evaluation:** here it is done *exactly*, by solving the linear system $V(s) = Q_V(s, \pi(s))$ for all $s$ at once.
+2. **Policy improvement:** make the policy greedy, changing a stake only if that strictly improves the value.
 
 ## Things to Try
 

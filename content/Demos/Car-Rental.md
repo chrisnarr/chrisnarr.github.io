@@ -6,20 +6,21 @@ draft: true
 
 <iframe src="/static/demos/car-rental.html" title="Jack's car rental" style="width: 100%; height: 1300px; border: none;" loading="lazy"></iframe>
 
-Jack manages two car rental locations, A and B. Every day, customers come to rent cars at both locations, and rented cars are returned there, both at random. Overnight, Jack can move up to five cars between the locations, at $2 per car. Every rented car earns $10, and each location can hold at most 20 cars.
-The question is how many cars to move overnight, for every combination of cars at A and B. Both panels answer it with dynamic programming: **value iteration (VI)** on the left and **policy iteration (PI)** on the right.
+How many cars should a rental company move between its two locations overnight? Both panels answer this with dynamic programming: **value iteration (VI)** on the left and **policy iteration (PI)** on the right. This is Example 4.2 from Sutton & Barto.
 
-Each cell of a heatmap is an evening state (cars at A upwards, cars at B to the right), and the number is the number of cars moved from A to B (negative: from B to A). Red numbers are moves that are not optimal. Below each panel, a strip of snapshots shows how the policy develops; switch to **Value** to see the value functions instead.
-Hover over a cell to compare both solutions with the optimal one.
+Each cell of a heatmap is an evening state (cars at A upwards, cars at B to the right), and its number is the number of cars moved from A to B (negative: from B to A). Red numbers are moves that are not optimal. Below each panel, a strip of snapshots shows how the policy develops; switch to **Value** to see the value functions instead. Hover over a cell to compare both solutions with the optimal one.
 
-This is Example 4.2 from Sutton & Barto.
+## Problem Setup
 
-## Setup
+- **State:** the number of cars at locations A and B in the evening, each between 0 and 20, so there are $21 \times 21$ states.
+- **Action:** the number of cars $a \in \{-5, \dots, 5\}$ moved overnight from A to B (negative: from B to A).
+- **Dynamics:** during the next day, rental requests and returns arrive at random at both locations. Both are Poisson distributed, with means 3 and 4 for requests and 3 and 2 for returns at A and B. A request can only be served if a car is available, and cars beyond 20 at a location are lost.
+- **Reward:** $+\$10$ for every rented car and $-\$2$ for every moved car.
+- **Objective:** maximise the expected discounted earnings, with $\gamma = 0.9$.
 
-The number of rental requests and returns per day at each location is Poisson distributed, with means 3 and 4 for requests and 3 and 2 for returns at A and B. Moving a car costs \$2, and future earnings are discounted with $\gamma = 0.9$.
-Because the two locations only interact through the cars that are moved, the expected value of the next state factorises. That makes a full sweep over all $21 \times 21$ states and 11 actions cheap.
+Because the two locations only interact through the cars that are moved, the expectation over the next state factorises, which makes a full sweep over all states and actions cheap.
 
-## Short Explanation
+## Method
 
 Both methods use the one-step lookahead
 
@@ -29,9 +30,14 @@ $$
 
 where the expectations go over the random requests and returns, given the number of cars at each location after the move $a$.
 
-**Value iteration** applies $V(s) \leftarrow \max_a Q_V(s, a)$ to every state in each sweep, and shows the greedy policy of the current values.
+**Value iteration** applies the Bellman optimality backup $V(s) \leftarrow \max_a Q_V(s, a)$ to every state in each sweep. The panel shows the greedy policy of the current values.
 
-**Policy iteration** starts from $\pi_0$, which never moves any cars. It evaluates the policy with sweeps of $V(s) \leftarrow Q_V(s, \pi(s))$ until they converge, and then makes the policy greedy. Here it needs only four improvements, $\pi_0 \to \pi_4$, just like in the book, and the strip shows each of them.
+**Policy iteration** starts from $\pi_0$, which never moves any cars, and alternates two steps:
+
+1. **Policy evaluation:** sweep $V(s) \leftarrow Q_V(s, \pi(s))$ until $V$ converges to $V^\pi$.
+2. **Policy improvement:** make the policy greedy with respect to $V^\pi$.
+
+Here it needs only four improvements, $\pi_0 \to \pi_4$, just like in the book, and the strip shows each of them.
 
 ## Things to Try
 

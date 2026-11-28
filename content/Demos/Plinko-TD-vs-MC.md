@@ -6,26 +6,34 @@ draft: true
 
 <iframe src="/static/demos/plinko.html" title="Plinko TD vs. MC" style="width: 100%; height: 1150px; border: none;" loading="lazy"></iframe>
 
-A ball drops onto a triangle of pegs, bounces left or right at every peg, and lands in a slot with a payoff.
-The value of a peg is the payoff a ball starting there can expect to win. Two learners estimate these values from **the same balls**: the left one with **Monte Carlo (MC)**, the right one with **TD(0)**. So any difference between them comes only from the update rule.
+How much can a ball expect to win, depending on the peg it starts from? Two learners estimate these values from **the same balls**: the left one with **Monte Carlo (MC)**, the right one with **TD(0)**. So any difference between them comes only from the update rule.
 
-**Click** a peg to drop the balls there, **drag a peg sideways** to bias it towards one side (**double-click** makes it fair again), and **drag the payoff bars** up or down.
-Pegs are shaded by their estimated value (or by their error, if you switch that on), faded pegs can't be reached from the drop peg, and highlighted rings mark the pegs that were just updated. Hover over a peg to compare both estimates with the true value.
+Pegs are shaded by their estimated value (or by their error, if you switch that on), faded pegs can't be reached from the drop peg, and highlighted rings mark the pegs that were just updated. Hover over a peg to compare both estimates with the true value. **Click** a peg to drop the balls there, **drag a peg sideways** to bias it towards one side (**double-click** makes it fair again), and **drag the payoff bars** up or down.
 
-## Short Explanation
+## Problem Setup
 
-This is a pure *prediction* problem: there are no actions, just a Markov chain. Every peg $s$ has a value
+- **State:** the peg the ball is at. There are no actions, so this is a pure *prediction* problem on a Markov chain.
+- **Dynamics:** at every peg $s$ the ball bounces left with probability $p_s$ (0.5 for a fair peg) and right otherwise, down to the next row.
+- **Reward and termination:** the ball lands in a slot below the last row, which pays its payoff $G$ and ends the episode.
+- **Objective:** estimate the value of every peg,
+  $$
+  V(s) = \mathbb{E}[\,G \mid s\,],
+  $$
+  the payoff a ball starting there can expect to win. The true values follow from a single backward pass from the slots, $V(s) = p_s\, V(s_\text{left}) + (1 - p_s)\, V(s_\text{right})$.
+
+## Method
+
+Both learners start from $V_0$ and move an estimate towards a target with learning rate $\alpha$,
 
 $$
-V(s) = \mathbb{E}[\,G \mid s\,],
+V(s) \leftarrow V(s) + \alpha\,(\text{target} - V(s)).
 $$
 
-where $G$ is the payoff of the slot the ball eventually lands in. The true values follow from a single backward pass from the slots, $V(s) = p_s\, V(s_\text{left}) + (1 - p_s)\, V(s_\text{right})$, where $p_s$ is the probability of bouncing left.
+They only differ in what that target is.
 
-Both learners start from $V_0$ and move an estimate towards a target with learning rate $\alpha$, $V(s) \leftarrow V(s) + \alpha\,(\text{target} - V(s))$:
+**Monte Carlo** waits until the ball lands and then moves *every* peg on the path towards the payoff $G$ it actually won. This target is unbiased, but it carries all the randomness of every bounce below that peg.
 
-- **Monte Carlo** waits until the ball lands and then moves *every* peg on the path towards the payoff $G$ it actually won. This target is unbiased, but it carries all the randomness of every bounce below that peg.
-- **TD(0)** updates each peg as soon as the ball leaves it, moving it towards the current estimate of the *next* peg, $V(s')$, or towards the payoff for the last row. That target only contains the randomness of one bounce, but it is biased as long as $V(s')$ is wrong, and information about the payoffs has to work its way up one row at a time.
+**TD(0)** updates each peg as soon as the ball leaves it, moving it towards the current estimate of the *next* peg, $V(s')$, or towards the payoff for the last row. That target only contains the randomness of one bounce, but it is biased as long as $V(s')$ is wrong, and information about the payoffs has to work its way up one row at a time.
 
 ## Things to Try
 

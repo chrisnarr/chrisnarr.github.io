@@ -6,30 +6,28 @@ draft: false
 
 <iframe src="/static/demos/td-mc.html" title="TD vs. MC gridworld" style="width: 100%; height: 1150px; border: none;" loading="lazy"></iframe>
 
-Two robots learn to reach the goal in the same gridworld, which starts out as the classic *cliff walking* task (Sutton & Barto, Example 6.6): the left one with **Monte Carlo (MC)** control and the right one with **temporal-difference (TD)** control (SARSA or Q-learning).
-**Click and drag** on either map to paint walls, lava, goals or the start cell with the selected tool (**right-click** erases), and watch how both agents adapt.
+Two robots learn to reach the goal in the same gridworld without knowing its model: the left one with **Monte Carlo (MC)** control and the right one with **temporal-difference (TD)** control (SARSA or Q-learning). The map starts out as the classic *cliff walking* task, Example 6.6 from Sutton & Barto.
 
-Each cell is shaded by its estimated value $\max_a Q(s,a)$: darker means more valuable, and a small dot means that the cell has never been updated. The arrows show the greedy policy.
-The **highlighted** cells are the ones whose Q-values were just updated: TD updates one cell right behind the robot on every step, while MC waits (dashed trail) and then updates the whole episode at once.
-Hover over a cell to compare both estimates with the optimal value $V^*$, which is computed with value iteration.
+Each cell is shaded by its estimated value $\max_a Q(s,a)$: darker means more valuable, and a small dot means that the cell has never been updated. The arrows show the greedy policy. The **highlighted** cells are the ones whose Q-values were just updated: TD updates one cell right behind the robot on every step, while MC waits (dashed trail) and then updates the whole episode at once. Hover over a cell to compare both estimates with the optimal value $V^*$, which is computed with value iteration. The plots show the return of each episode (dots, with a moving average), how often the current greedy policy reaches the goal from the start cell **S**, and the RMS error between $\max_a Q$ and $V^*$, all against the number of environment steps. **Click and drag** on either map to paint walls, lava, goals or the start cell with the selected tool (**right-click** erases), and watch how both agents adapt.
 
-The plots show the return of each episode (dots, with a moving average), how often the current greedy policy reaches the goal from the start cell **S**, and the RMS error between $\max_a Q$ and $V^*$, all plotted against the number of environment steps.
+## Problem Setup
 
-## Setup
+- **State:** the cell the robot is in.
+- **Action:** move up, down, left or right.
+- **Dynamics:** with the slip probability (0 by default), the robot slips to one of the two perpendicular directions instead. Walls and the border block movement.
+- **Reward and termination:** every step costs $-0.02$. Reaching a **goal** gives $+1$ and stepping into **lava** gives $-1$, and both end the episode. Episodes are also cut off after 100 steps.
+- **Start:** by default every episode starts at **S**; with *exploring starts* it starts in a random open cell instead.
+- **Objective:** maximise the expected discounted return. Unlike in dynamic programming, the agents don't know the model and have to learn from their own experience.
 
-The robot moves up, down, left or right, but with the slip probability (0 by default) it slips to one of the two perpendicular directions instead. Walls and the border block movement.
-Every step costs $-0.02$. Reaching a **goal** gives $+1$ and stepping into **lava** gives $-1$, and both end the episode. Episodes are also cut off after 100 steps.
-Both agents explore with an $\varepsilon$-greedy policy and start from $Q = 0$. By default every episode starts at **S**; with *exploring starts* it starts in a random open cell instead.
+## Method
 
-## Short Explanation
-
-Both methods nudge $Q(s_t, a_t)$ towards a **target** with learning rate $\alpha$,
+Both agents start from $Q = 0$, explore with an $\varepsilon$-greedy policy, and nudge $Q(s_t, a_t)$ towards a **target** with learning rate $\alpha$,
 
 $$
-Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \big( \text{target} - Q(s_t, a_t) \big),
+Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \big( \text{target} - Q(s_t, a_t) \big).
 $$
 
-and only differ in what that target is.
+They only differ in what that target is.
 
 **Monte Carlo** uses the actual discounted return of the rest of the episode,
 
