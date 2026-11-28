@@ -751,7 +751,9 @@
         try {
           const fe = window.frameElement
           const h = Math.ceil(document.getElementById("wrap").getBoundingClientRect().height)
-          if (fe) fe.style.height = h + 4 + "px"
+          const px = h + 4 + "px"
+          // only write when it changes, so the observer below does not trigger itself
+          if (fe && fe.style.height !== px) fe.style.height = px
         } catch (e) {}
       }
 
@@ -780,6 +782,13 @@
       watchTheme()
       new ResizeObserver(resize).observe(document.querySelector(".panels"))
       new ResizeObserver(fitFrame).observe(document.getElementById("wrap"))
+      // Quartz's SPA navigation (e.g. clicking the current page in the sidebar) patches the
+      // parent page in place: the iframe is kept without reloading, but its inline height is reset
+      // to the one in the markdown. Re-fit whenever the frame's style attribute changes.
+      try {
+        if (window.frameElement)
+          new MutationObserver(fitFrame).observe(window.frameElement, { attributes: true, attributeFilter: ["style"] })
+      } catch (e) {}
       resize()
       requestAnimationFrame(frame)
     </script>
